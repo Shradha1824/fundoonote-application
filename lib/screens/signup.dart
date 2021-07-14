@@ -56,8 +56,8 @@ class SignUp extends StatelessWidget {
                     decoration: InputDecoration(
                         labelText: 'Email Id', border: OutlineInputBorder()),
                     validator: MultiValidator([
-                      EmailValidator(errorText: "not valid"),
-                      RequiredValidator(errorText: "Required"),
+                      EmailValidator(errorText: "Please enter valid Email"),
+                      RequiredValidator(errorText: "Valid Email Expected"),
                     ])),
                 Padding(padding: EdgeInsets.all(15)),
                 TextFormField(
