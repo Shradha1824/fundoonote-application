@@ -1,4 +1,10 @@
+import 'dart:html';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/main.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -8,16 +14,38 @@ class LoginScreen extends StatefulWidget {
 
 class LoginScreenState extends State<LoginScreen> {
   GlobalKey<FormState> formkey = GlobalKey<FormState>();
+  final databaseReference = FirebaseFirestore.instance;
+  CollectionReference _collectionRef =
+      FirebaseFirestore.instance.collection('users');
 
-  void validate() {
+  @override
+  void initState() {
+    super.initState();
+    getData();
+  }
+
+  Future<void> getData() async {
+    // Get docs from collection reference
+    QuerySnapshot querySnapshot = await _collectionRef.get();
+
+    // Get data from docs and convert map to List
+    final allData = querySnapshot.docs.map((doc) => doc.data()).toList();
+
+    print(allData);
+  }
+
+  var users;
+  void validate() async {
     if (formkey.currentState!.validate()) {
       print("Ok");
+      //if(document.data.contains("emailid") == emailid.text){
     } else {
       print("Error");
     }
   }
 
-  TextEditingController _password = TextEditingController();
+  TextEditingController emailid = TextEditingController();
+  TextEditingController password = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +83,7 @@ class LoginScreenState extends State<LoginScreen> {
                                 ])),
                             Padding(padding: EdgeInsets.all(15)),
                             TextFormField(
+                                controller: emailid,
                                 decoration: InputDecoration(
                                     labelText: 'Email',
                                     border: OutlineInputBorder()),
@@ -66,6 +95,7 @@ class LoginScreenState extends State<LoginScreen> {
                                 ])),
                             Padding(padding: EdgeInsets.all(15)),
                             TextFormField(
+                                controller: password,
                                 decoration: InputDecoration(
                                     labelText: 'Password',
                                     border: OutlineInputBorder()),
@@ -79,7 +109,9 @@ class LoginScreenState extends State<LoginScreen> {
                                 }),
                             Padding(padding: EdgeInsets.all(15)),
                             RaisedButton(
-                              onPressed: validate,
+                              onPressed: () {
+                                validate();
+                              },
                               child: Text('Submit'),
                               shape: StadiumBorder(),
                               color: Theme.of(context).primaryColor,

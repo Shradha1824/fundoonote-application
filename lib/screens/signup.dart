@@ -1,13 +1,27 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/main.dart';
 import 'package:form_field_validator/form_field_validator.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 // ignore: must_be_immutable
 class SignUp extends StatelessWidget {
   GlobalKey<FormState> formkey = GlobalKey<FormState>();
 
-  void validate() {
+  final databaseReference = FirebaseFirestore.instance;
+  void validate() async {
     if (formkey.currentState!.validate()) {
       print("Ok");
+
+      DocumentReference users =
+          await databaseReference.collection('users').add({
+        'firstName': '${_firstname.text}',
+        'lastName': '${_lastname.text}',
+        'emailId': '${_emailid.text}',
+        'password': '${_password.text}',
+      });
+      print(users.id);
     } else {
       print("Error");
     }
@@ -21,6 +35,9 @@ class SignUp extends StatelessWidget {
     }
   }
 
+  TextEditingController _firstname = TextEditingController();
+  TextEditingController _lastname = TextEditingController();
+  TextEditingController _emailid = TextEditingController();
   TextEditingController _password = TextEditingController();
   TextEditingController _confirmpassword = TextEditingController();
 
@@ -41,18 +58,21 @@ class SignUp extends StatelessWidget {
               children: [
                 Padding(padding: EdgeInsets.all(15)),
                 TextFormField(
+                  controller: _firstname,
                   decoration: InputDecoration(
                       labelText: 'First Name', border: OutlineInputBorder()),
                   validator: textValidate,
                 ),
                 Padding(padding: EdgeInsets.all(15)),
                 TextFormField(
+                  controller: _lastname,
                   decoration: InputDecoration(
                       labelText: 'Last Name', border: OutlineInputBorder()),
                   validator: textValidate,
                 ),
                 Padding(padding: EdgeInsets.all(15)),
                 TextFormField(
+                    controller: _emailid,
                     decoration: InputDecoration(
                         labelText: 'Email Id', border: OutlineInputBorder()),
                     validator: MultiValidator([
@@ -94,7 +114,7 @@ class SignUp extends StatelessWidget {
                 Padding(padding: EdgeInsets.all(15)),
                 RaisedButton(
                   onPressed: validate,
-                  child: Text('Sign Up'),
+                  child: Text('Submit'),
                   shape: StadiumBorder(),
                   color: Theme.of(context).primaryColor,
                   padding: EdgeInsets.symmetric(horizontal: 120, vertical: 18),
@@ -106,5 +126,15 @@ class SignUp extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  void getUser(BuildContext context) async {
+    final UserCredential userCredential = await _firebaseAuth
+        .createUserWithEmailAndPassword(
+            email: _emailid.text, password: _password.text)
+        .catchError((errMsg) {
+      print("error");
+    });
   }
 }
