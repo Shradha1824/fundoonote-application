@@ -1,10 +1,10 @@
-import 'dart:html';
+import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/main.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -30,22 +30,19 @@ class LoginScreenState extends State<LoginScreen> {
 
     // Get data from docs and convert map to List
     final allData = querySnapshot.docs.map((doc) => doc.data()).toList();
-
     print(allData);
   }
 
-  var users;
   void validate() async {
     if (formkey.currentState!.validate()) {
       print("Ok");
-      //if(document.data.contains("emailid") == emailid.text){
     } else {
       print("Error");
     }
   }
 
-  TextEditingController emailid = TextEditingController();
-  TextEditingController password = TextEditingController();
+  TextEditingController _emailidController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +80,7 @@ class LoginScreenState extends State<LoginScreen> {
                                 ])),
                             Padding(padding: EdgeInsets.all(15)),
                             TextFormField(
-                                controller: emailid,
+                                controller: _emailidController,
                                 decoration: InputDecoration(
                                     labelText: 'Email',
                                     border: OutlineInputBorder()),
@@ -95,7 +92,7 @@ class LoginScreenState extends State<LoginScreen> {
                                 ])),
                             Padding(padding: EdgeInsets.all(15)),
                             TextFormField(
-                                controller: password,
+                                controller: _passwordController,
                                 decoration: InputDecoration(
                                     labelText: 'Password',
                                     border: OutlineInputBorder()),
@@ -111,6 +108,23 @@ class LoginScreenState extends State<LoginScreen> {
                             RaisedButton(
                               onPressed: () {
                                 validate();
+                                FirebaseFirestore.instance
+                                    .collection('users')
+                                    .get()
+                                    .then((QuerySnapshot querySnapshot) {
+                                  querySnapshot.docs.forEach((docs) {
+                                    print(docs["emailId"]);
+                                    print(docs["password"]);
+                                    if ((docs["emailId"] ==
+                                            '${_emailidController.text}') &&
+                                        (docs["password"] ==
+                                            '${_passwordController.text}')) {
+                                      print("Login is Successfully");
+                                    } else {
+                                      print("First you need to Register");
+                                    }
+                                  });
+                                });
                               },
                               child: Text('Submit'),
                               shape: StadiumBorder(),

@@ -127,14 +127,4 @@ class SignUp extends StatelessWidget {
       ),
     );
   }
-
-  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-  void getUser(BuildContext context) async {
-    final UserCredential userCredential = await _firebaseAuth
-        .createUserWithEmailAndPassword(
-            email: _emailid.text, password: _password.text)
-        .catchError((errMsg) {
-      print("error");
-    });
-  }
 }
