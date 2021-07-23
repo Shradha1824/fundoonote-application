@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/screens/home.dart';
+import 'package:flutter_application_1/screens/login.dart';
+import 'package:flutter_application_1/screens/note_appear_page.dart';
+
+import 'screens/signup.dart';
 
 void main() {
   runApp(MyApp());
@@ -10,8 +13,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Home(),
-    );
+        debugShowCheckedModeBanner: false,
+        initialRoute: '/signup',
+        routes: {
+          '/signup': (context) => Signup(),
+          '/login': (context) => Login(),
+          '/note_appear_page': (context) => NoteAppearPage(),
+        });
   }
 }
