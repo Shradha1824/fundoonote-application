@@ -9,10 +9,6 @@ class NoteAppearPage extends StatefulWidget {
 
 class NoteAppearPageState extends State<NoteAppearPage> {
   static const String routeName = '/note_appear_page';
-  DrawerController _drawerController = DrawerController(
-    child: NavigationDrawer(),
-    alignment: DrawerAlignment.end,
-  );
   @override
   Widget build(BuildContext context) {
     return Scaffold(
