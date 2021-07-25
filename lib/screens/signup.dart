@@ -57,6 +57,10 @@ class SignUp extends StatelessWidget {
             key: formkey,
             child: Column(
               children: [
+                SizedBox(
+                  height: 200,
+                  child: ListView(),
+                ),
                 Padding(padding: EdgeInsets.all(15)),
                 TextFormField(
                   controller: _firstname,
@@ -115,7 +119,11 @@ class SignUp extends StatelessWidget {
                 Padding(padding: EdgeInsets.all(15)),
                 InkWell(splashColor: Colors.greenAccent),
                 RaisedButton(
-                  onPressed: validate,
+                  onPressed: () {
+                    validate();
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => LoginScreen()));
+                  },
                   child: Text('Submit'),
                   shape: StadiumBorder(),
                   color: Theme.of(context).primaryColor,
@@ -128,14 +136,5 @@ class SignUp extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  void navigationPage(BuildContext context) {
-    ElevatedButton(
-        child: Text('open route'),
-        onPressed: () {
-          Navigator.push(
-              context, MaterialPageRoute(builder: (context) => LoginScreen()));
-        });
   }
 }

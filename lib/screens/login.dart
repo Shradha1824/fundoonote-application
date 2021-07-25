@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/screens/note_appear_page.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -120,8 +121,22 @@ class LoginScreenState extends State<LoginScreen> {
                                         (docs["password"] ==
                                             '${_passwordController.text}')) {
                                       print("Login is Successfully");
+                                      var snackBar = SnackBar(
+                                          content: Text("login Successful"));
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(snackBar);
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  NoteAppearPage()));
                                     } else {
                                       print("First you need to Register");
+                                      var snackBar = SnackBar(
+                                          content: Text(
+                                              "your emailId and password is not matching"));
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(snackBar);
                                     }
                                   });
                                 });

@@ -1,6 +1,10 @@
+import 'dart:ffi';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/screens/notes_screen.dart';
+
+import 'notes_screen.dart';
+import 'reminders.dart';
 
 class NoteAppearPage extends StatefulWidget {
   @override
@@ -9,6 +13,10 @@ class NoteAppearPage extends StatefulWidget {
 
 class NoteAppearPageState extends State<NoteAppearPage> {
   static const String routeName = '/note_appear_page';
+  DrawerController _drawerController = DrawerController(
+    child: NavigationDrawer(),
+    alignment: DrawerAlignment.end,
+  );
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,7 +70,23 @@ class NoteAppearPageState extends State<NoteAppearPage> {
                                   ),
                                 ])))))),
         drawer: NavigationDrawer(),
-        body: Center(child: Text("Notes you add appear here")),
+        body: Center(
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+              Image.asset(
+                "assets/images/bulb[1].png",
+                width: 200,
+                height: 100,
+              ),
+              SizedBox(
+                height: 15,
+              ),
+              Text("Notes you add appear here"),
+
+              //Text("Notes you add appear here"),
+            ])),
         floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
         floatingActionButton: FloatingActionButton(
           onPressed: () {},
@@ -133,13 +157,21 @@ class NavigationDrawer extends StatelessWidget {
           createDrawerBodyItem(
             icon: Icons.lightbulb_outline,
             text: 'Notes',
-            onTap: () {},
+            onTap: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => NoteAppearPage()));
+            },
           ),
+          Divider(),
           createDrawerBodyItem(
             icon: Icons.notifications_outlined,
             text: 'Reminders',
-            onTap: () {},
+            onTap: () {
+              //  Navigator.push(context,
+              //      MaterialPageRoute(builder: (context) => Reminders()));
+            },
           ),
+          Divider(),
           createDrawerBodyItem(
             icon: Icons.add,
             text: 'Create new label',
@@ -151,30 +183,29 @@ class NavigationDrawer extends StatelessWidget {
             text: 'Archive',
             onTap: () {},
           ),
+          Divider(),
           createDrawerBodyItem(
             icon: Icons.delete_outline,
             text: 'Deleted',
             onTap: () {},
           ),
+          Divider(),
         ],
       ),
     );
   }
 
   Widget createDrawerHeader() {
-    return DrawerHeader(
-        margin: EdgeInsets.only(top: 0),
-        padding: EdgeInsets.all(20),
-        child: Stack(children: <Widget>[
-          Positioned(
-              bottom: 80.0,
-              left: 16.0,
-              child: Text("Google Keep",
-                  style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.w500))),
-        ]));
+    return Container(
+      height: 100.0,
+      padding: EdgeInsets.only(top: 5),
+      child: DrawerHeader(
+          child: Text("Fundoo Notes",
+              style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.w500))),
+    );
   }
 
   Widget createDrawerBodyItem(

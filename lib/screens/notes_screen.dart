@@ -12,14 +12,14 @@ class TitlePageState extends State<TitlePage> {
     return Scaffold(
         appBar: AppBar(
             elevation: 0.0,
-            backgroundColor: Colors.white12,
+            backgroundColor: Colors.white10,
             bottom: PreferredSize(
                 preferredSize: Size.fromHeight(20),
                 child: Container(
                     child: Padding(
                         padding: const EdgeInsets.only(top: 5, bottom: 10),
                         child: Material(
-                            color: Colors.white,
+                            color: Colors.white10,
                             child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 mainAxisAlignment: MainAxisAlignment.start,
@@ -56,9 +56,12 @@ class TitlePageState extends State<TitlePage> {
                                         size: 25,
                                       ),
                                       color: Colors.black.withOpacity(0.7),
-                                      onPressed: () {}),
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      }),
                                 ])))))),
         body: Container(
+            color: Colors.white10,
             margin: EdgeInsets.only(bottom: 20),
             child: Container(
                 child: Column(children: [
@@ -88,37 +91,120 @@ class TitlePageState extends State<TitlePage> {
                 ]),
                 padding: EdgeInsets.all(20))),
         bottomNavigationBar: BottomAppBar(
-            shape: CircularNotchedRectangle(),
-            color: Colors.white,
             child: Container(
-                width: 80,
-                height: 50,
+                color: Colors.white10,
                 child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       IconButton(
-                          icon: Icon(
-                            Icons.add_box_outlined,
-                            size: 25,
-                            color: Colors.black.withOpacity(0.7),
-                          ),
-                          onPressed: () {}),
-                      SizedBox(width: 5.0),
+                        icon: Icon(
+                          Icons.add_box_outlined,
+                          size: 25,
+                          color: Colors.black.withOpacity(0.7),
+                        ),
+                        onPressed: () {
+                          showModalBottomSheet(
+                              context: context,
+                              builder: (context) {
+                                return Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    ListTile(
+                                      leading: new Icon(Icons.photo_camera),
+                                      title: new Text('Take photo'),
+                                      onTap: () {
+                                        Navigator.pop(context);
+                                      },
+                                    ),
+                                    ListTile(
+                                      leading: new Icon(Icons.crop_original),
+                                      title: new Text('Add image'),
+                                      onTap: () {
+                                        Navigator.pop(context);
+                                      },
+                                    ),
+                                    ListTile(
+                                      leading: new Icon(Icons.brush_outlined),
+                                      title: new Text('Drawing'),
+                                      onTap: () {
+                                        Navigator.pop(context);
+                                      },
+                                    ),
+                                    ListTile(
+                                      leading: new Icon(Icons.mic),
+                                      title: new Text('Recording'),
+                                      onTap: () {
+                                        Navigator.pop(context);
+                                      },
+                                    ),
+                                    ListTile(
+                                      leading:
+                                          new Icon(Icons.check_box_outlined),
+                                      title: new Text('Tick boxes'),
+                                      onTap: () {
+                                        Navigator.pop(context);
+                                      },
+                                    ),
+                                  ],
+                                );
+                              });
+                        },
+                      ),
                       IconButton(
-                          icon: Icon(
-                            Icons.color_lens_outlined,
-                            size: 25,
-                            color: Colors.black.withOpacity(0.7),
-                          ),
-                          onPressed: () {}),
-                      SizedBox(width: 235.0),
-                      IconButton(
-                          icon: Icon(
-                            Icons.more_vert,
-                            size: 25,
-                            color: Colors.black.withOpacity(0.7),
-                          ),
-                          onPressed: () {}),
+                        icon: Icon(
+                          Icons.more_vert,
+                          size: 25,
+                          color: Colors.black.withOpacity(0.7),
+                        ),
+                        onPressed: () {
+                          showModalBottomSheet(
+                              context: context,
+                              builder: (context) {
+                                return Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    ListTile(
+                                      leading: new Icon(Icons.delete_sharp),
+                                      title: new Text('Delete'),
+                                      onTap: () {
+                                        Navigator.pop(context);
+                                      },
+                                    ),
+                                    ListTile(
+                                      leading: new Icon(Icons.filter_none),
+                                      title: new Text('Make a copy'),
+                                      onTap: () {
+                                        Navigator.pop(context);
+                                      },
+                                    ),
+                                    ListTile(
+                                      leading: new Icon(Icons.share),
+                                      title: new Text('Send'),
+                                      onTap: () {
+                                        Navigator.pop(context);
+                                      },
+                                    ),
+                                    ListTile(
+                                      leading: new Icon(Icons.person_add_alt),
+                                      title: new Text('Collaborator'),
+                                      onTap: () {
+                                        Navigator.pop(context);
+                                      },
+                                    ),
+                                    ListTile(
+                                      leading: new Icon(
+                                        Icons.label,
+                                      ),
+                                      title: new Text('Labels'),
+                                      onTap: () {
+                                        Navigator.pop(context);
+                                      },
+                                    ),
+                                  ],
+                                );
+                              });
+                        },
+                      )
                     ]))));
   }
 }
