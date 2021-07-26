@@ -4,7 +4,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'notes_screen.dart';
-import 'reminders.dart';
 
 class NoteAppearPage extends StatefulWidget {
   @override
