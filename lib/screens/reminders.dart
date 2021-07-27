@@ -43,7 +43,13 @@ class Reminders extends StatelessWidget {
                                         size: 25,
                                       ),
                                       color: Colors.black.withOpacity(0.7),
-                                      onPressed: () {}),
+                                      onPressed: () {
+                                        TextField(
+                                          decoration: InputDecoration.collapsed(
+                                            hintText: "Search your notes",
+                                          ),
+                                        );
+                                      }),
                                   SizedBox(width: 2.0),
                                   IconButton(
                                       icon: Icon(
