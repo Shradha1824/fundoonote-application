@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/screens/notes_screen.dart';
 import 'note_appear_page.dart';
 
 class Reminders extends StatelessWidget {
@@ -13,13 +14,14 @@ class Reminders extends StatelessWidget {
             bottom: PreferredSize(
                 preferredSize: Size.fromHeight(20),
                 child: Container(
+                    // margin: EdgeInsets.only(left: 15, right: 15, bottom: 30),
                     child: Padding(
                         padding: const EdgeInsets.only(top: 5, bottom: 10),
                         child: Material(
                             color: Colors.white10,
                             child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.max,
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   IconButton(
                                       icon: Icon(
@@ -44,11 +46,12 @@ class Reminders extends StatelessWidget {
                                       ),
                                       color: Colors.black.withOpacity(0.7),
                                       onPressed: () {
-                                        TextField(
-                                          decoration: InputDecoration.collapsed(
-                                            hintText: "Search your notes",
-                                          ),
-                                        );
+                                        TextFormField(
+                                            decoration:
+                                                InputDecoration.collapsed(
+                                              hintText: "Search your notes",
+                                            ),
+                                            onChanged: (value) {});
                                       }),
                                   SizedBox(width: 2.0),
                                   IconButton(
@@ -66,8 +69,8 @@ class Reminders extends StatelessWidget {
                 Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           Image.asset(
             "assets/images/reminder[1].png",
-            width: 120,
-            height: 120,
+            width: 100,
+            height: 100,
           ),
           SizedBox(
             height: 15,
@@ -79,7 +82,10 @@ class Reminders extends StatelessWidget {
           onPressed: () {},
           child: Builder(
               builder: (context) => IconButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => TitlePage()));
+                  },
                   icon: Image.asset("assets/images/addIcon.png"))),
           foregroundColor: Colors.amber,
           focusColor: Colors.white10,

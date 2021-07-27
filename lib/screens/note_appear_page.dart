@@ -2,8 +2,11 @@ import 'dart:ffi';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/screens/notes_screen.dart';
+import 'package:flutter_application_1/screens/reminders.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import 'notes_screen.dart';
+import 'login.dart';
 
 class NoteAppearPage extends StatefulWidget {
   @override
@@ -12,6 +15,22 @@ class NoteAppearPage extends StatefulWidget {
 
 class NoteAppearPageState extends State<NoteAppearPage> {
   static const String routeName = '/note_appear_page';
+
+  late SharedPreferences loginData; // create object for sharedPreference
+  late String userEmail; //to store email in sharedpreference
+
+  void initState() {
+    super.initState();
+    initial();
+  }
+
+  void initial() async {
+    loginData = await SharedPreferences.getInstance();
+    setState(() {
+      userEmail = loginData.getString('userEmail')!;
+    });
+  }
+
   DrawerController _drawerController = DrawerController(
     child: NavigationDrawer(),
     alignment: DrawerAlignment.end,
@@ -38,7 +57,7 @@ class NoteAppearPageState extends State<NoteAppearPage> {
                           )
                         ]),
                     child: Padding(
-                        padding: const EdgeInsets.only(right: 20, left: 6),
+                        padding: const EdgeInsets.only(right: 10, left: 6),
                         child: Material(
                             color: Colors.white,
                             child: Row(
@@ -48,6 +67,7 @@ class NoteAppearPageState extends State<NoteAppearPage> {
                                   IconButton(
                                       icon: Icon(
                                         Icons.menu,
+                                        size: 30,
                                       ),
                                       color: Colors.black.withOpacity(0.7),
                                       onPressed: () {
@@ -64,9 +84,35 @@ class NoteAppearPageState extends State<NoteAppearPage> {
                                     child: Icon(
                                       Icons.view_agenda_outlined,
                                       color: Colors.black.withOpacity(0.7),
+                                      size: 25,
                                     ),
-                                    onTap: () {},
+                                    onTap: () {
+                                      icon:
+                                      Icons.grid_view;
+                                    },
                                   ),
+                                  SizedBox(
+                                    width: 10,
+                                  ),
+                                  IconButton(
+                                    icon: CircleAvatar(
+                                      backgroundColor: Colors.orange[400],
+                                      radius: 15,
+                                      child: Text(
+                                        'S',
+                                        style: TextStyle(
+                                            fontSize: 15, color: Colors.black),
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      loginData.setBool('login', true);
+                                      Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  LoginScreen()));
+                                    },
+                                  )
                                 ])))))),
         drawer: NavigationDrawer(),
         body: Center(
@@ -166,8 +212,8 @@ class NavigationDrawer extends StatelessWidget {
             icon: Icons.notifications_outlined,
             text: 'Reminders',
             onTap: () {
-              //  Navigator.push(context,
-              //      MaterialPageRoute(builder: (context) => Reminders()));
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => Reminders()));
             },
           ),
           Divider(),
@@ -201,9 +247,12 @@ class NavigationDrawer extends StatelessWidget {
       child: DrawerHeader(
           child: Text("Fundoo Notes",
               style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.w500))),
+                color: Colors.black,
+                fontSize: 20.0,
+                fontWeight: FontWeight.w500,
+                //foreground: Paint()
+                // shadows:
+              ))),
     );
   }
 
