@@ -6,11 +6,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/screens/note_appear_page.dart';
-import 'package:flutter_application_1/screens/notes_screen.dart';
-import 'package:flutter_application_1/screens/signup.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'desplay_notes.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
