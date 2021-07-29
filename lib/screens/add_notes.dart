@@ -1,5 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class TitlePage extends StatefulWidget {
   @override
@@ -7,6 +11,31 @@ class TitlePage extends StatefulWidget {
 }
 
 class TitlePageState extends State<TitlePage> {
+  late SharedPreferences loginData; // create object for sharedPreference
+  late String userEmail;
+  late String title;
+  late String content;
+  //to store email in sharedpreference
+
+  void initState() {
+    super.initState();
+    initial();
+  }
+
+  void initial() async {
+    loginData = await SharedPreferences.getInstance();
+    setState(() {
+      userEmail = loginData.getString('userEmail')!;
+      title = loginData.getString('title')!;
+      content = loginData.getString('content')!;
+    });
+  }
+
+  TextEditingController _titlecontroller = TextEditingController();
+  TextEditingController _contentcontroller = TextEditingController();
+
+  CollectionReference ref = FirebaseFirestore.instance.collection('notes');
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,12 +55,18 @@ class TitlePageState extends State<TitlePage> {
                                 children: [
                                   IconButton(
                                       icon: Icon(
-                                        Icons.arrow_back,
+                                        Icons.arrow_back_ios_rounded,
                                         size: 25,
                                       ),
                                       color: Colors.black.withOpacity(0.7),
                                       onPressed: () {
-                                        Navigator.pop(context);
+                                        ref.add({
+                                          'emailId': '$userEmail',
+                                          'title': '${_titlecontroller.text}',
+                                          'content':
+                                              '${_contentcontroller.text}',
+                                        }).whenComplete(
+                                            () => Navigator.pop(context));
                                       }),
                                   SizedBox(width: 190.0),
                                   IconButton(
@@ -66,6 +101,7 @@ class TitlePageState extends State<TitlePage> {
             child: Container(
                 child: Column(children: [
                   TextField(
+                    controller: _titlecontroller,
                     decoration: InputDecoration(
                         border: InputBorder.none,
                         hintText: 'Title',
@@ -79,6 +115,7 @@ class TitlePageState extends State<TitlePage> {
                     height: 1,
                   ),
                   TextField(
+                    controller: _contentcontroller,
                     decoration: InputDecoration(
                         border: InputBorder.none,
                         hintText: 'Note',
@@ -207,4 +244,13 @@ class TitlePageState extends State<TitlePage> {
                       )
                     ]))));
   }
+
+  /* void printuserdata() {
+    FirebaseFirestore.instance
+        .collection('notes');
+        if ('$userEmail' ==  ) {
+          
+        } else {
+          print('data not found');
+        }*/
 }
