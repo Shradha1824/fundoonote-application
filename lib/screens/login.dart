@@ -6,9 +6,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/screens/note_appear_page.dart';
-import 'package:flutter_application_1/screens/signup.dart';
 import 'package:form_field_validator/form_field_validator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'desplay_notes.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -22,11 +23,15 @@ class LoginScreenState extends State<LoginScreen> {
       FirebaseFirestore.instance.collection('users');
   late bool _passwordVisible;
 
+  late SharedPreferences loginData; //create object for sharedPreference
+  late bool newUser; //to check whether user is new or already existing
+
   @override
   void initState() {
     super.initState();
     getData();
     _passwordVisible = false;
+    check_if_already_login();
   }
 
   void unvisiblePass(TapDownDetails details) {
@@ -142,6 +147,9 @@ class LoginScreenState extends State<LoginScreen> {
                               horizontal: 140, vertical: 20),
                           onPressed: () {
                             validate();
+                            String userEmail = _emailidController.text;
+                            String userPassword = _passwordController.text;
+
                             FirebaseFirestore.instance
                                 .collection('users')
                                 .get()
@@ -161,11 +169,18 @@ class LoginScreenState extends State<LoginScreen> {
                                   );
                                   ScaffoldMessenger.of(context)
                                       .showSnackBar(snackBar);
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              NoteAppearPage()));
+                                  if (userEmail != '' && userPassword != '') {
+                                    print('Successfull');
+                                    //making use of object create one instance
+                                    loginData.setBool('login', false);
+
+                                    loginData.setString('userEmail', userEmail);
+                                    Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                NoteAppearPage()));
+                                  }
                                 } else {
                                   print("First you need to Register");
                                   var snackBar = SnackBar(
@@ -200,5 +215,16 @@ class LoginScreenState extends State<LoginScreen> {
                         ),
                       ]))
                     ])))));
+  }
+
+  void check_if_already_login() async {
+    loginData = await SharedPreferences.getInstance();
+    newUser = (loginData.getBool('login') ?? true);
+
+    print(newUser);
+    if (newUser == false) {
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (context) => NoteAppearPage()));
+    }
   }
 }

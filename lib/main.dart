@@ -1,8 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter_application_1/screens/note_appear_page.dart';
-import 'package:flutter_application_1/screens/notes_screen.dart';
+import 'package:flutter_application_1/screens/desplay_notes.dart';
+import 'package:flutter_application_1/screens/add_notes.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/login.dart';
 import 'screens/signup.dart';
 
@@ -17,39 +18,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
         debugShowCheckedModeBanner: false,
-        initialRoute: '/signup',
+        initialRoute: '/login',
         routes: {
-          '/signup': (context) => SignUp(),
+          //'/signup': (context) => SignUp(),
           '/login': (context) => LoginScreen(),
-          '/note_screen': (context) => TitlePage(),
+          '/add_notes': (context) => TitlePage(),
         });
-    /*body: buildPages(),
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: index,
-          selectedItemColor: Colors.orange,
-          items: [
-            BottomNavigationBarItem(
-              icon: Text('Sign Up'),
-              title: Text('Page'),
-            ),
-            BottomNavigationBarItem(
-              icon: Text('Login'),
-              title: Text('Page'),
-            ),
-          ],
-          onTap: (int index) => setState(() => this.index = index),
-        ),
-      );
-
-  Widget buildPages() {
-    switch (index) {
-      case 0:
-        return NoteAppearPage();
-      case 1:
-        return LoginScreen();
-      default:
-        return Container();
-    }
-  }*/
   }
 }
