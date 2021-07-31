@@ -3,31 +3,29 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/screens/delete_notes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class TitlePage extends StatefulWidget {
+class AddNotePage extends StatefulWidget {
   @override
-  TitlePageState createState() => TitlePageState();
+  AddNotePageState createState() => AddNotePageState();
 }
 
-class TitlePageState extends State<TitlePage> {
+class AddNotePageState extends State<AddNotePage> {
+  //share data on local device in form of key and value use of sharedpreference
   late SharedPreferences loginData; // create object for sharedPreference
-  late String userEmail;
-  late String title;
-  late String content;
-  //to store email in sharedpreference
+  late String userEmail; //to store email in sharedpreference
 
   void initState() {
     super.initState();
-    initial();
+    getLoginData();
   }
 
-  void initial() async {
+  void getLoginData() async {
     loginData = await SharedPreferences.getInstance();
     setState(() {
       userEmail = loginData.getString('userEmail')!;
-      title = loginData.getString('title')!;
-      content = loginData.getString('content')!;
+      print('userEmail: $userEmail');
     });
   }
 
@@ -60,13 +58,21 @@ class TitlePageState extends State<TitlePage> {
                                       ),
                                       color: Colors.black.withOpacity(0.7),
                                       onPressed: () {
-                                        ref.add({
-                                          'emailId': '$userEmail',
-                                          'title': '${_titlecontroller.text}',
-                                          'content':
-                                              '${_contentcontroller.text}',
-                                        }).whenComplete(
-                                            () => Navigator.pop(context));
+                                        var title = _titlecontroller.text;
+                                        var content = _contentcontroller.text;
+                                        if (title.isEmpty && content.isEmpty) {
+                                          print('Notes required');
+                                          Navigator.pop(context);
+                                        } else {
+                                          print('Notes added');
+                                          ref.add({
+                                            'emailId': '$userEmail',
+                                            'title': '${_titlecontroller.text}',
+                                            'content':
+                                                '${_contentcontroller.text}',
+                                          }).whenComplete(
+                                              () => Navigator.pop(context));
+                                        }
                                       }),
                                   SizedBox(width: 190.0),
                                   IconButton(
@@ -244,13 +250,4 @@ class TitlePageState extends State<TitlePage> {
                       )
                     ]))));
   }
-
-  /* void printuserdata() {
-    FirebaseFirestore.instance
-        .collection('notes');
-        if ('$userEmail' ==  ) {
-          
-        } else {
-          print('data not found');
-        }*/
 }

@@ -1,8 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter_application_1/screens/note_appear_page.dart';
-import 'package:flutter_application_1/screens/notes_screen.dart';
 import 'screens/add_notes.dart';
 import 'screens/desplay_notes.dart';
 import 'screens/login.dart';

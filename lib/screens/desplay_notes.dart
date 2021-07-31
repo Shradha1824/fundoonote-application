@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -76,7 +74,7 @@ class NoteAppearPageState extends State<NoteAppearPage> {
                                       ),
                                       color: Colors.black.withOpacity(0.7),
                                       onPressed: () {
-                                        NavigationDrawer();
+                                        Navigator.pop(context);
                                       }),
                                   Expanded(
                                     child: TextField(
