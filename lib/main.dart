@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
         initialRoute: '/note_appear_page',
         routes: {
           '/note_appear_page': (context) => NoteAppearPage(),
-          '/note_screen': (context) => TitlePage(),
+          '/note_screen': (context) => AddNotePage(),
         });
   }
 }

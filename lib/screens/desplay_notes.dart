@@ -202,7 +202,7 @@ class NoteAppearPageState extends State<NoteAppearPage> {
               builder: (context) => IconButton(
                   onPressed: () {
                     Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => TitlePage()));
+                        MaterialPageRoute(builder: (context) => AddNotePage()));
                   },
                   icon: Image.asset("assets/images/addIcon.png"))),
           foregroundColor: Colors.amber,

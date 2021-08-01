@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'add_notes.dart';
 import 'desplay_notes.dart';
 
-
-
 class Reminders extends StatelessWidget {
   static const String routeName = '/reminders';
 
@@ -87,7 +85,7 @@ class Reminders extends StatelessWidget {
               builder: (context) => IconButton(
                   onPressed: () {
                     Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => TitlePage()));
+                        MaterialPageRoute(builder: (context) => AddNotePage()));
                   },
                   icon: Image.asset("assets/images/addIcon.png"))),
           foregroundColor: Colors.amber,
