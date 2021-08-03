@@ -99,19 +99,19 @@ class DisplayNotePageState extends State<DisplayNotePage> {
                                     width: 0,
                                   ),
                                   GestureDetector(
-                                      onTap: () {
-                                        Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    CreateNewLabel()));
-                                      },
+                                      // onTap: () {
+                                      //  Navigator.push(
+                                      //     context,
+                                      //    MaterialPageRoute(
+                                      //       builder: (context) =>
+                                      //          CreateNewLabel()));
+
                                       child: Text(
-                                        "Search your notes",
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                        ),
-                                      )),
+                                    "Search your notes",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    ),
+                                  )),
                                   SizedBox(
                                     width: 55,
                                   ),

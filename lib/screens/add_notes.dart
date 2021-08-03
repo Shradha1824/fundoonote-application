@@ -3,19 +3,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/screens/delete_notes.dart';
+import 'package:flutter_application_1/screens/apply_color_to_notes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // ignore: must_be_immutable
 class AddNotePage extends StatefulWidget {
-  late int selectedIndex = 0;
-
-  //final Function(int) onTap;
-  //final int selectedIndex;
-  // AddNotePage({required this.onTap, required this.selectedIndex});
-
   @override
   AddNotePageState createState() => AddNotePageState();
-  void onTap(int index) {}
 }
 
 class AddNotePageState extends State<AddNotePage> {
@@ -23,23 +18,7 @@ class AddNotePageState extends State<AddNotePage> {
   late SharedPreferences loginData; // create object for sharedPreference
   late String userEmail; //to store email in sharedpreference
   FocusNode myFocusNode = new FocusNode();
-
-  final colors = [
-    Color(0xffffffff), // classic white
-    Color(0xfff28b81), // light pink
-    Color(0xffafcbfa), // light blue
-    Color(0xffd7aefc), // plum
-    Color(0xfffbcfe9), // misty rose
-    Color(0xffe6c9a9), // light brown
-    Color(0xffe9eaee), // light gray
-    Color(0xfff7bd02), // yellow
-    Color(0xfffbf476), // light yellow
-    Color(0xffcdff90), // light green
-    Color(0xffa7feeb), // turquoise
-    Color(0xffcbf0f8), // light cyan
-  ];
-
-  var selectedIndex;
+  late Color _color;
 
   void initState() {
     super.initState();
@@ -51,6 +30,7 @@ class AddNotePageState extends State<AddNotePage> {
     setState(() {
       userEmail = loginData.getString('userEmail')!;
       print('userEmail: $userEmail');
+      print('_color: $_color');
     });
   }
 
@@ -58,9 +38,6 @@ class AddNotePageState extends State<AddNotePage> {
   TextEditingController _contentcontroller = TextEditingController();
 
   CollectionReference ref = FirebaseFirestore.instance.collection('notes');
-
-  late String name;
-  late String colorcode;
 
   @override
   Widget build(BuildContext context) {
@@ -98,6 +75,7 @@ class AddNotePageState extends State<AddNotePage> {
                                             'title': '${_titlecontroller.text}',
                                             'content':
                                                 '${_contentcontroller.text}',
+                                            'color': '$_color',
                                           }).whenComplete(
                                               () => Navigator.pop(context));
                                         }
@@ -138,13 +116,16 @@ class AddNotePageState extends State<AddNotePage> {
                     controller: _titlecontroller,
                     focusNode: myFocusNode,
                     cursorColor: Colors.black54,
-                    style: TextStyle(height: 2),
+                    style: TextStyle(
+                      height: 1,
+                      fontSize: 25,
+                    ),
                     decoration: InputDecoration(
                         border: InputBorder.none,
                         hintText: 'Title',
                         hintStyle: TextStyle(
                             color: Colors.black26,
-                            fontSize: 25,
+                            fontSize: 20,
                             fontWeight: FontWeight.w400,
                             fontStyle: FontStyle.normal)),
                   ),
@@ -154,6 +135,9 @@ class AddNotePageState extends State<AddNotePage> {
                   TextField(
                     controller: _contentcontroller,
                     cursorColor: Colors.black54,
+                    style: TextStyle(
+                      fontSize: 15,
+                    ),
                     decoration: InputDecoration(
                         border: InputBorder.none,
                         hintText: 'Note',
@@ -161,8 +145,11 @@ class AddNotePageState extends State<AddNotePage> {
                             color: Colors.black26,
                             fontSize: 18,
                             fontWeight: FontWeight.w400,
-                            fontStyle: FontStyle.normal)),
-                  )
+                            fontStyle: FontStyle.normal),
+                        helperStyle: TextStyle(
+                          fontSize: 25,
+                        )),
+                  ),
                 ]),
                 padding: EdgeInsets.all(20))),
         bottomNavigationBar: BottomAppBar(
@@ -229,16 +216,49 @@ class AddNotePageState extends State<AddNotePage> {
                         width: 5,
                       ),
                       IconButton(
+                          onPressed: () {
+                            showModalBottomSheet(
+                                context: context,
+                                builder: (context) {
+                                  return Container(
+                                    height: 120,
+                                    child: SizedBox(
+                                      width: 50,
+                                      height: 50,
+                                      child: DisplayColor(
+                                        onSelectedColor: (value) {
+                                          print(value);
+                                          setState(() {
+                                            _color = value;
+                                          });
+                                        },
+                                        availableColors: [
+                                          Colors.white,
+                                          Colors.blue,
+                                          Colors.red,
+                                          Colors.yellow,
+                                          Colors.pink,
+                                          Colors.purple,
+                                          Colors.orangeAccent,
+                                          Colors.amber,
+                                          Colors.cyan,
+                                          Colors.brown,
+                                          Colors.indigo,
+                                          Colors.green,
+                                        ],
+                                        initialColor: Colors.white,
+                                      ),
+                                    ),
+                                  );
+                                });
+                          },
                           icon: Icon(
                             Icons.color_lens_outlined,
                             size: 25,
                             color: Colors.black.withOpacity(0.7),
-                          ),
-                          onPressed: () {
-                            colorNotes();
-                          }),
+                          )),
                       SizedBox(
-                        width: 240,
+                        width: 230,
                       ),
                       IconButton(
                         icon: Icon(
@@ -298,7 +318,7 @@ class AddNotePageState extends State<AddNotePage> {
                     ]))));
   }
 
-  void colorNotes() {
+  /* void colorNotes() {
     if (selectedIndex == null) {
       selectedIndex = widget.selectedIndex;
     }
@@ -350,5 +370,5 @@ class AddNotePageState extends State<AddNotePage> {
                 ),
               ));
         });
-  }
+  }*/
 }
