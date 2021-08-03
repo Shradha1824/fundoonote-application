@@ -5,7 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_application_1/screens/search_notes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'add_notes.dart';
