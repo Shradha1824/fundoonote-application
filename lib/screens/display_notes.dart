@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_application_1/screens/search_notes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'add_notes.dart';
@@ -21,12 +22,11 @@ class DisplayNotePageState extends State<DisplayNotePage> {
 
   late SharedPreferences loginData; // create object for sharedPreference
   late String userEmail;
-  String searchString = '';
 
   CollectionReference _collectionRef =
       FirebaseFirestore.instance.collection('notes');
 
-  Color _color = Colors.white;
+  late Color _color;
 
   @override
   void initState() {
@@ -99,19 +99,19 @@ class DisplayNotePageState extends State<DisplayNotePage> {
                                     width: 0,
                                   ),
                                   GestureDetector(
-                                      // onTap: () {
-                                      //  Navigator.push(
-                                      //     context,
-                                      //    MaterialPageRoute(
-                                      //       builder: (context) =>
-                                      //          CreateNewLabel()));
-
+                                      onTap: () {
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    CreateNewLabel()));
+                                      },
                                       child: Text(
-                                    "Search your notes",
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                    ),
-                                  )),
+                                        "Search your notes",
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                        ),
+                                      )),
                                   SizedBox(
                                     width: 55,
                                   ),
@@ -193,14 +193,14 @@ class DisplayNotePageState extends State<DisplayNotePage> {
                                 margin: EdgeInsets.fromLTRB(10, 15, 10, 15),
                                 decoration: BoxDecoration(
                                   color: otherColor,
-                                  border: Border.all(color: Colors.black),
-                                  borderRadius: BorderRadius.circular(6.0),
+                                  border: Border.all(color: Colors.black38),
+                                  borderRadius: BorderRadius.circular(8.0),
                                 ),
                                 child: Column(
                                   children: [
                                     Text(
                                       document['title'],
-                                      textAlign: TextAlign.end,
+                                      textAlign: TextAlign.start,
                                       style: TextStyle(
                                           fontSize: 20,
                                           fontWeight: FontWeight.bold),
