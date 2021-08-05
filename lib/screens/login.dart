@@ -6,10 +6,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/screens/display_notes.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'desplay_notes.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -179,7 +178,7 @@ class LoginScreenState extends State<LoginScreen> {
                                         context,
                                         MaterialPageRoute(
                                             builder: (context) =>
-                                                NoteAppearPage()));
+                                                DisplayNotePage()));
                                   }
                                 } else {
                                   print("First you need to Register");
@@ -224,7 +223,7 @@ class LoginScreenState extends State<LoginScreen> {
     print(newUser);
     if (newUser == false) {
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => NoteAppearPage()));
+          context, MaterialPageRoute(builder: (context) => DisplayNotePage()));
     }
   }
 }

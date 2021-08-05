@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 import 'add_notes.dart';
-import 'desplay_notes.dart';
+import 'display_notes.dart';
 
-class Reminders extends StatelessWidget {
+class ReminderPage extends StatelessWidget {
   static const String routeName = '/reminders';
 
   @override

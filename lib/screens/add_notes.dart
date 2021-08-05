@@ -1,11 +1,16 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/screens/delete_notes.dart';
-import 'package:flutter_application_1/screens/apply_color_to_notes.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_application_1/screens/user_login.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'apply_color_to_notes.dart';
 
 // ignore: must_be_immutable
 class AddNotePage extends StatefulWidget {
@@ -18,7 +23,11 @@ class AddNotePageState extends State<AddNotePage> {
   late SharedPreferences loginData; // create object for sharedPreference
   late String userEmail; //to store email in sharedpreference
   FocusNode myFocusNode = new FocusNode();
-  late Color _color;
+  late Color _color = Colors.white;
+  // late DateTime now = DateTime.now();
+  // final dateFormate = DateFormat('dd-MM');
+  late DateTime pickedDate = DateTime.now();
+  late TimeOfDay pickedTime = TimeOfDay.now();
 
   void initState() {
     super.initState();
@@ -42,16 +51,19 @@ class AddNotePageState extends State<AddNotePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        backgroundColor: _color,
         appBar: AppBar(
+            backwardsCompatibility: false,
+            systemOverlayStyle: SystemUiOverlayStyle(statusBarColor: _color),
+            backgroundColor: _color,
             elevation: 0.0,
-            backgroundColor: Colors.white10,
             bottom: PreferredSize(
                 preferredSize: Size.fromHeight(20),
                 child: Container(
                     child: Padding(
                         padding: const EdgeInsets.only(top: 5, bottom: 10),
                         child: Material(
-                            color: Colors.white10,
+                            color: _color,
                             child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 mainAxisAlignment: MainAxisAlignment.start,
@@ -90,12 +102,51 @@ class AddNotePageState extends State<AddNotePage> {
                                       onPressed: () {}),
                                   SizedBox(width: 2.0),
                                   IconButton(
-                                      icon: Icon(
-                                        Icons.add_alert_outlined,
-                                        size: 25,
-                                      ),
-                                      color: Colors.black.withOpacity(0.7),
-                                      onPressed: () {}),
+                                    icon: Icon(
+                                      Icons.add_alert_outlined,
+                                      size: 25,
+                                    ),
+                                    color: Colors.black.withOpacity(0.7),
+                                    onPressed: () {
+                                      showModalBottomSheet(
+                                          context: context,
+                                          builder: (context) {
+                                            return Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: <Widget>[
+                                                ListTile(
+                                                  leading: new Icon(
+                                                      Icons.access_time),
+                                                  title:
+                                                      new Text('Later today'),
+                                                  trailing: Text('18:00'),
+                                                  onTap: () {
+                                                    Navigator.pop(context);
+                                                  },
+                                                ),
+                                                ListTile(
+                                                  leading: new Icon(
+                                                      Icons.access_time),
+                                                  title: new Text(
+                                                      'Later tomorrow'),
+                                                  trailing: Text('08:00'),
+                                                  onTap: () {
+                                                    Navigator.pop(context);
+                                                  },
+                                                ),
+                                                ListTile(
+                                                    leading: new Icon(
+                                                        Icons.access_time),
+                                                    title: new Text(
+                                                        'Choose a date & time'),
+                                                    onTap: () {
+                                                      _showDialog(context);
+                                                    }),
+                                              ],
+                                            );
+                                          });
+                                    },
+                                  ),
                                   SizedBox(width: 2.0),
                                   IconButton(
                                       icon: Icon(
@@ -108,7 +159,6 @@ class AddNotePageState extends State<AddNotePage> {
                                       }),
                                 ])))))),
         body: Container(
-            color: Colors.white10,
             margin: EdgeInsets.only(bottom: 20),
             child: Container(
                 child: Column(children: [
@@ -116,18 +166,20 @@ class AddNotePageState extends State<AddNotePage> {
                     controller: _titlecontroller,
                     focusNode: myFocusNode,
                     cursorColor: Colors.black54,
+                    maxLines: 1,
                     style: TextStyle(
                       height: 1,
                       fontSize: 25,
                     ),
                     decoration: InputDecoration(
-                        border: InputBorder.none,
-                        hintText: 'Title',
-                        hintStyle: TextStyle(
-                            color: Colors.black26,
-                            fontSize: 20,
-                            fontWeight: FontWeight.w400,
-                            fontStyle: FontStyle.normal)),
+                      border: InputBorder.none,
+                      hintText: 'Title',
+                      hintStyle: TextStyle(
+                          color: Colors.black26,
+                          fontSize: 25,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.normal),
+                    ),
                   ),
                   SizedBox(
                     height: 1,
@@ -135,6 +187,7 @@ class AddNotePageState extends State<AddNotePage> {
                   TextField(
                     controller: _contentcontroller,
                     cursorColor: Colors.black54,
+                    maxLines: 10,
                     style: TextStyle(
                       fontSize: 15,
                     ),
@@ -154,7 +207,7 @@ class AddNotePageState extends State<AddNotePage> {
                 padding: EdgeInsets.all(20))),
         bottomNavigationBar: BottomAppBar(
             child: Container(
-                color: Colors.white10,
+                color: _color,
                 child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
@@ -218,6 +271,7 @@ class AddNotePageState extends State<AddNotePage> {
                       IconButton(
                           onPressed: () {
                             showModalBottomSheet(
+                                backgroundColor: _color,
                                 context: context,
                                 builder: (context) {
                                   return Container(
@@ -234,16 +288,16 @@ class AddNotePageState extends State<AddNotePage> {
                                         },
                                         availableColors: [
                                           Colors.white,
-                                          Colors.blue,
-                                          Colors.red,
-                                          Colors.yellow,
-                                          Colors.pink,
-                                          Colors.purple,
+                                          Colors.blueAccent,
+                                          Colors.redAccent,
+                                          Colors.yellowAccent,
+                                          Colors.pinkAccent,
+                                          Colors.purpleAccent,
                                           Colors.orangeAccent,
-                                          Colors.amber,
+                                          Colors.indigoAccent,
                                           Colors.cyan,
                                           Colors.brown,
-                                          Colors.indigo,
+                                          Colors.blueGrey,
                                           Colors.green,
                                         ],
                                         initialColor: Colors.white,
@@ -317,58 +371,108 @@ class AddNotePageState extends State<AddNotePage> {
                       )
                     ]))));
   }
-
-  /* void colorNotes() {
-    if (selectedIndex == null) {
-      selectedIndex = widget.selectedIndex;
-    }
-    showModalBottomSheet(
+  // Show Dialog function
+  void _showDialog(context) {
+    // flutter defined function
+    showDialog(
         context: context,
-        builder: (context) {
-          return Container(
-              height: 100,
-              child: SizedBox(
-                width: 50,
-                height: 50,
-                child: Padding(
-                  padding: EdgeInsets.only(top: 15, left: 15),
-                  child: Container(
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: colors.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return InkWell(
-                          onTap: () {
-                            setState(() {
-                              selectedIndex == index
-                                  ? colors[index]
-                                  : Container();
-                              print('s');
-                            });
-                            widget.onTap(index);
-                          },
-                          child: Container(
-                              padding: EdgeInsets.all(8.0),
-                              width: 50,
-                              height: 50,
-                              child: Container(
-                                child: Center(
-                                    child: selectedIndex == index
-                                        ? Icon(Icons.done)
-                                        : Container()),
-                                decoration: BoxDecoration(
-                                  color: colors[index],
-                                  shape: BoxShape.circle,
-                                  border:
-                                      Border.all(width: 2, color: Colors.grey),
+        builder: (BuildContext context) {
+          // return alert dialog object
+          return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              child: Container(
+                  height: 220.0,
+                  width: 100.0,
+                  child: Padding(
+                      padding: EdgeInsets.all(12.0),
+                      child: Column(
+                          children: [
+                            SizedBox(width: 10,),
+                            Text(
+                              "Add Reminder",
+                              style: TextStyle(
+                                fontSize: 20,
+                                color: Colors.black.withOpacity(0.9),
+                                fontWeight: FontWeight.w600
+                              ),
+                              textAlign: TextAlign.start,
+                            ),
+                            Column(
+                              children: <Widget>[
+                                SizedBox(height: 10, width: 10,),
+                                ListTile(
+                                  title: Text(
+                                      "${pickedDate.day} - ${pickedDate.month}",
+                                      style: TextStyle(fontSize: 18,
+                                      color: Colors.black.withOpacity(0.9)
+                                      ),
+                                      ),
+                                  trailing: Icon(Icons.keyboard_arrow_down,
+                                  color: Colors.black87.withOpacity(0.7),
+                                  ),
+                                  onTap: _pickedDate,
                                 ),
-                              )),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-              ));
+                                ListTile(
+                                  title: Text(
+                                      "${pickedTime.hour}:${pickedTime.minute}",
+                                      style: TextStyle(fontSize: 18,
+                                      color: Colors.black.withOpacity(0.9),
+                                      ),
+                                      ),
+                                  trailing: Icon(Icons.keyboard_arrow_down,
+                                  color: Colors.black87.withOpacity(0.7)
+                                  ),
+                                  onTap: _pickedTime,
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                SizedBox(width: 150,),
+                            FlatButton(
+                              onPressed: (){
+                            },
+                             child: Text('Save',
+                            style: TextStyle(fontSize: 18),
+                            ),
+                            color: Colors.orange,
+                            ),
+                          ])]))));
         });
-  }*/
+  }
+  Future _pickedDate() async {
+    DateTime? date = await showDatePicker(
+      context: context,
+      initialDate: pickedDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2022),
+    ).then((value) {
+      print(value)
+      setState(() {
+        pickedDate = value!;
+      });
+    });
+
+    if (date == null)
+      setState(() {
+        pickedDate = date!;
+      });
+  }
+
+  _pickedTime() async {
+    TimeOfDay? time =
+        await showTimePicker(context: context, initialTime: TimeOfDay.now())
+        .then((value) {
+          setState(() {
+            pickedTime = value!;
+          });
+        });
+    
+    if (time == null)
+      setState(() {
+        pickedTime = time!;
+      });
+  }
 }
