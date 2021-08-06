@@ -1,33 +1,44 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_application_1/screens/display_notes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class TitlePage extends StatefulWidget {
+import 'apply_color_to_notes.dart';
+import 'archive_notes.dart';
+
+// ignore: must_be_immutable
+class AddNotePage extends StatefulWidget {
   @override
-  TitlePageState createState() => TitlePageState();
+  AddNotePageState createState() => AddNotePageState();
 }
 
-class TitlePageState extends State<TitlePage> {
+class AddNotePageState extends State<AddNotePage> {
+  //share data on local device in form of key and value use of sharedpreference
   late SharedPreferences loginData; // create object for sharedPreference
-  late String userEmail;
-  late String title;
-  late String content;
-  //to store email in sharedpreference
+  late String userEmail; //to store email in sharedpreference
+  FocusNode myFocusNode = new FocusNode();
+  late Color _color = Colors.white;
+  // late DateTime now = DateTime.now();
+  // final dateFormate = DateFormat('dd-MM');
+  late DateTime pickedDate = DateTime.now();
+  late TimeOfDay pickedTime = TimeOfDay.now();
+  late bool archive = false;
+  late bool _pin = false;
+  
 
   void initState() {
     super.initState();
-    initial();
+    getLoginData();
   }
 
-  void initial() async {
+  void getLoginData() async {
     loginData = await SharedPreferences.getInstance();
     setState(() {
       userEmail = loginData.getString('userEmail')!;
-      title = loginData.getString('title')!;
-      content = loginData.getString('content')!;
+      print('userEmail: $userEmail');
+      print('_color: $_color');
     });
   }
 
@@ -39,16 +50,19 @@ class TitlePageState extends State<TitlePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        backgroundColor: _color,
         appBar: AppBar(
+            backwardsCompatibility: false,
+            systemOverlayStyle: SystemUiOverlayStyle(statusBarColor: _color),
+            backgroundColor: _color,
             elevation: 0.0,
-            backgroundColor: Colors.white10,
             bottom: PreferredSize(
                 preferredSize: Size.fromHeight(20),
                 child: Container(
                     child: Padding(
                         padding: const EdgeInsets.only(top: 5, bottom: 10),
                         child: Material(
-                            color: Colors.white10,
+                            color: _color,
                             child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 mainAxisAlignment: MainAxisAlignment.start,
@@ -60,13 +74,25 @@ class TitlePageState extends State<TitlePage> {
                                       ),
                                       color: Colors.black.withOpacity(0.7),
                                       onPressed: () {
-                                        ref.add({
-                                          'emailId': '$userEmail',
-                                          'title': '${_titlecontroller.text}',
-                                          'content':
-                                              '${_contentcontroller.text}',
-                                        }).whenComplete(
-                                            () => Navigator.pop(context));
+                                          var title = _titlecontroller.text;
+                                          var content = _contentcontroller.text;
+                                        if (title.isEmpty && content.isEmpty) {
+                                          print('Notes required');
+                                          Navigator.pop(context);
+                                        } else {
+                                          print('Notes added');
+                                          print(archive);
+                                          ref.add({
+                                            'archive': false,
+                                            'pin': false,
+                                            'emailId': '$userEmail',
+                                            'title': '${_titlecontroller.text}',
+                                            'content':
+                                                '${_contentcontroller.text}',
+                                            'color': '$_color',
+                                          }).whenComplete(
+                                              () => Navigator.pop(context));
+                                        }
                                       }),
                                   SizedBox(width: 190.0),
                                   IconButton(
@@ -75,15 +101,55 @@ class TitlePageState extends State<TitlePage> {
                                         size: 25,
                                       ),
                                       color: Colors.black.withOpacity(0.7),
-                                      onPressed: () {}),
+                                      onPressed: () {
+                                      }),
                                   SizedBox(width: 2.0),
                                   IconButton(
-                                      icon: Icon(
-                                        Icons.add_alert_outlined,
-                                        size: 25,
-                                      ),
-                                      color: Colors.black.withOpacity(0.7),
-                                      onPressed: () {}),
+                                    icon: Icon(
+                                      Icons.add_alert_outlined,
+                                      size: 25,
+                                    ),
+                                    color: Colors.black.withOpacity(0.7),
+                                    onPressed: () {
+                                      showModalBottomSheet(
+                                          context: context,
+                                          builder: (context) {
+                                            return Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: <Widget>[
+                                                ListTile(
+                                                  leading: new Icon(
+                                                      Icons.access_time),
+                                                  title:
+                                                      new Text('Later today'),
+                                                  trailing: Text('18:00'),
+                                                  onTap: () {
+                                                    Navigator.pop(context);
+                                                  },
+                                                ),
+                                                ListTile(
+                                                  leading: new Icon(
+                                                      Icons.access_time),
+                                                  title: new Text(
+                                                      'Later tomorrow'),
+                                                  trailing: Text('08:00'),
+                                                  onTap: () {
+                                                    Navigator.pop(context);
+                                                  },
+                                                ),
+                                                ListTile(
+                                                    leading: new Icon(
+                                                        Icons.access_time),
+                                                    title: new Text(
+                                                        'Choose a date & time'),
+                                                    onTap: () {
+                                                      _showDialog(context);
+                                                    }),
+                                              ],
+                                            );
+                                          });
+                                    },
+                                  ),
                                   SizedBox(width: 2.0),
                                   IconButton(
                                       icon: Icon(
@@ -92,30 +158,61 @@ class TitlePageState extends State<TitlePage> {
                                       ),
                                       color: Colors.black.withOpacity(0.7),
                                       onPressed: () {
-                                        Navigator.pop(context);
-                                      }),
+                                       var title = _titlecontroller.text;
+                                       var content = _contentcontroller.text; 
+                                       if (title.isEmpty && content.isEmpty){   
+                                             Navigator.push(context, MaterialPageRoute(builder: 
+                                             (context) => DisplayNotePage()));
+                                      }else{
+                                        showAlertDialog(context);
+                                        ref.add({
+                                            'archive': true,
+                                            'pin': false,
+                                            'emailId': '$userEmail',
+                                            'title': '${_titlecontroller.text}',
+                                            'content':
+                                                '${_contentcontroller.text}',
+                                            'color': '$_color',
+                                          }).whenComplete(
+                                        () => Navigator.push(context, MaterialPageRoute(builder: 
+                                        (context) => ArchivePage())));
+                                      }
+                                            }
+                            ),
                                 ])))))),
         body: Container(
-            color: Colors.white10,
             margin: EdgeInsets.only(bottom: 20),
             child: Container(
                 child: Column(children: [
                   TextField(
                     controller: _titlecontroller,
+                    focusNode: myFocusNode,
+                    cursorColor: Colors.black54,
+                    maxLines: 1,
+                    style: TextStyle(
+                      height: 1,
+                      fontSize: 25,
+                    ),
                     decoration: InputDecoration(
-                        border: InputBorder.none,
-                        hintText: 'Title',
-                        hintStyle: TextStyle(
-                            color: Colors.black26,
-                            fontSize: 25,
-                            fontWeight: FontWeight.w400,
-                            fontStyle: FontStyle.normal)),
+                      border: InputBorder.none,
+                      hintText: 'Title',
+                      hintStyle: TextStyle(
+                          color: Colors.black26,
+                          fontSize: 25,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.normal),
+                    ),
                   ),
                   SizedBox(
                     height: 1,
                   ),
                   TextField(
                     controller: _contentcontroller,
+                    cursorColor: Colors.black54,
+                    maxLines: 10,
+                    style: TextStyle(
+                      fontSize: 15,
+                    ),
                     decoration: InputDecoration(
                         border: InputBorder.none,
                         hintText: 'Note',
@@ -123,15 +220,18 @@ class TitlePageState extends State<TitlePage> {
                             color: Colors.black26,
                             fontSize: 18,
                             fontWeight: FontWeight.w400,
-                            fontStyle: FontStyle.normal)),
-                  )
+                            fontStyle: FontStyle.normal),
+                        helperStyle: TextStyle(
+                          fontSize: 25,
+                        )),
+                  ),
                 ]),
                 padding: EdgeInsets.all(20))),
         bottomNavigationBar: BottomAppBar(
             child: Container(
-                color: Colors.white10,
+                color: Colors.white,
                 child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
                       IconButton(
                         icon: Icon(
@@ -186,6 +286,55 @@ class TitlePageState extends State<TitlePage> {
                                 );
                               });
                         },
+                      ),
+                      SizedBox(
+                        width: 5,
+                      ),
+                      IconButton(
+                          onPressed: () {
+                            showModalBottomSheet(
+                                backgroundColor: _color,
+                                context: context,
+                                builder: (context) {
+                                  return Container(
+                                    height: 120,
+                                    child: SizedBox(
+                                      width: 50,
+                                      height: 50,
+                                      child: DisplayColor(
+                                        onSelectedColor: (value) {
+                                          print(value);
+                                          setState(() {
+                                            _color = value;
+                                          });
+                                        },
+                                        availableColors: [
+                                          Colors.white,
+                                          Colors.blueAccent,
+                                          Colors.redAccent,
+                                          Colors.yellowAccent,
+                                          Colors.pinkAccent,
+                                          Colors.purpleAccent,
+                                          Colors.orangeAccent,
+                                          Colors.indigoAccent,
+                                          Colors.cyan,
+                                          Colors.brown,
+                                          Colors.blueGrey,
+                                          Colors.green,
+                                        ],
+                                        initialColor: Colors.white,
+                                      ),
+                                    ),
+                                  );
+                                });
+                          },
+                          icon: Icon(
+                            Icons.color_lens_outlined,
+                            size: 25,
+                            color: Colors.black.withOpacity(0.7),
+                          )),
+                      SizedBox(
+                        width: 230,
                       ),
                       IconButton(
                         icon: Icon(
@@ -244,13 +393,142 @@ class TitlePageState extends State<TitlePage> {
                       )
                     ]))));
   }
+  // Show Dialog function
+  void _showDialog(context) {
+    // flutter defined function
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          // return alert dialog object
+          return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              child: Container(
+                  height: 250.0,
+                  width: 100.0,
+                  child: Padding(
+                      padding: EdgeInsets.all(12.0),
+                      child: Column(
+                          children: [
+                            SizedBox(width: 10,),
+                            Text(
+                              "Add Reminder",
+                              style: TextStyle(
+                                fontSize: 20,
+                                color: Colors.black.withOpacity(0.9),
+                                fontWeight: FontWeight.w600
+                              ),
+                              textAlign: TextAlign.start,
+                            ),
+                            Column(
+                              children: <Widget>[
+                                SizedBox(height: 10, width: 10,),
+                                ListTile(
+                                  title: Text(
+                                      "${pickedDate.day} - ${pickedDate.month}",
+                                      style: TextStyle(fontSize: 18,
+                                      color: Colors.black.withOpacity(0.9)
+                                      ),
+                                      ),
+                                  trailing: Icon(Icons.keyboard_arrow_down,
+                                  color: Colors.black87.withOpacity(0.7),
+                                  ),
+                                  onTap: _pickedDate,
+                                ),
+                                Divider(
+                                  color: Colors.grey,
+                                ),
+                                ListTile(
+                                  title: Text(
+                                      "${pickedTime.hour}:${pickedTime.minute}",
+                                      style: TextStyle(fontSize: 18,
+                                      color: Colors.black.withOpacity(0.9),
+                                      ),
+                                      ),
+                                  trailing: Icon(Icons.keyboard_arrow_down,
+                                  color: Colors.black87.withOpacity(0.7)
+                                  ),
+                                  onTap: _pickedTime,
+                                ),
+                                Divider(
+                                  color: Colors.grey,
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                               // SizedBox(width: 150,),
+                            FlatButton(
+                              onPressed: (){
+                            },
+                             child: Text('Cancel',
+                            style: TextStyle(fontSize: 17),
+                            ),
+                            ),
+                            SizedBox(width: 70,),
+                             FlatButton(
+                              onPressed: (){
+                                Navigator.pop(context);
+                            },
+                             child: Text('Save',
+                            style: TextStyle(fontSize: 17),
+                            ),
+                            color: Colors.orange,
+                            ),
+                          ])]))));
+        });
+  }
+  Future _pickedDate() async {
+    DateTime? date = await showDatePicker(
+      context: context,
+      initialDate: pickedDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2022),
+    ).then((value) {
+      print(value)
+      setState(() {
+        pickedDate = value!;
+      });
+    });
 
-  /* void printuserdata() {
-    FirebaseFirestore.instance
-        .collection('notes');
-        if ('$userEmail' ==  ) {
-          
-        } else {
-          print('data not found');
-        }*/
+    if (date == null)
+      setState(() {
+        pickedDate = date!;
+      });
+  }
+
+  _pickedTime() async {
+    TimeOfDay? time =
+        await showTimePicker(context: context, initialTime: TimeOfDay.now())
+        .then((value) {
+          setState(() {
+            pickedTime = value!;
+          });
+        });
+    
+    if (time == null)
+      setState(() {
+        pickedTime = time!;
+      });
+  }
+
+  showAlertDialog(BuildContext context){
+    //set up the button
+  Widget undoButton = TextButton(onPressed: (){
+    Navigator.push(context, MaterialPageRoute(builder: (context) => DisplayNotePage()));
+  }, child: Text("undo"),
+  );
+
+    //set up the AlertDialog
+  AlertDialog alert = AlertDialog(title: Text("Note archived"),
+  actions: [
+    undoButton
+  ],);
+
+    //show the dialog
+  showDialog(context: context, builder: (BuildContext context){
+    return alert;
+  });  
+}
 }

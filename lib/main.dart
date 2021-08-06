@@ -4,6 +4,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_application_1/screens/desplay_notes.dart';
 import 'package:flutter_application_1/screens/add_notes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_application_1/screens/display_notes.dart';
+import 'screens/add_notes.dart';
 import 'screens/login.dart';
 import 'screens/signup.dart';
 
@@ -22,7 +24,9 @@ class MyApp extends StatelessWidget {
         routes: {
           //'/signup': (context) => SignUp(),
           '/login': (context) => LoginScreen(),
-          '/add_notes': (context) => TitlePage(),
+          '/add_notes': (context) => AddNotePage(),
+          '/note_appear_page': (context) => DisplayNotePage(),
+          '/note_screen': (context) => AddNotePage(),
         });
   }
 }

@@ -1,60 +1,73 @@
-import 'dart:ffi';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-<<<<<<< HEAD:lib/screens/note_appear_page.dart
-import 'package:flutter_application_1/screens/notes_screen.dart';
 import 'package:flutter_application_1/screens/reminders.dart';
-=======
+import 'package:flutter/services.dart';
+import 'package:flutter_application_1/screens/search_notes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'add_notes.dart';
+import 'archive_notes.dart';
 import 'login.dart';
 import 'reminders.dart';
->>>>>>> development:lib/screens/desplay_notes.dart
 
-class NoteAppearPage extends StatefulWidget {
+class DisplayNotePage extends StatefulWidget {
   @override
-  NoteAppearPageState createState() => NoteAppearPageState();
+  DisplayNotePageState createState() => DisplayNotePageState();
 }
 
-class NoteAppearPageState extends State<NoteAppearPage> {
+class DisplayNotePageState extends State<DisplayNotePage> {
   static const String routeName = '/note_appear_page';
 
   late SharedPreferences loginData; // create object for sharedPreference
   late String userEmail;
-  late String title;
-  late String content;
 
-  var index;
+  CollectionReference _collectionRef =
+      FirebaseFirestore.instance.collection('notes');
 
+  late Color _color;
+  late bool archive;
+  late bool _pin;
+
+  @override
   void initState() {
     super.initState();
-    initial();
+    getNotes();
+    getLoginData();
   }
 
-  void initial() async {
+  void getLoginData() async {
     loginData = await SharedPreferences.getInstance();
     setState(() {
       userEmail = loginData.getString('userEmail')!;
       print('userEmail: $userEmail');
+      print('_color: $_color');
     });
   }
 
-  final ref = FirebaseFirestore.instance.collection('notes');
+  Future<void> getNotes() async {
+    // Get docs from collection reference
+    QuerySnapshot querySnapshot = await _collectionRef.get();
+
+    // Get data from docs and convert map to List
+    final allData = querySnapshot.docs.map((doc) => doc.data()).toList();
+    print(allData);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
             elevation: 0.0,
-            backgroundColor: Colors.white10,
+            backwardsCompatibility: false,
+            systemOverlayStyle:
+                SystemUiOverlayStyle(statusBarColor: Colors.white),
+            backgroundColor: Colors.white,
             bottom: PreferredSize(
-                preferredSize: Size.fromHeight(kToolbarHeight),
+                preferredSize: Size.fromHeight(20),
                 child: Container(
-                    margin: EdgeInsets.only(left: 15, right: 15, bottom: 30),
+                    margin: EdgeInsets.only(
+                        top: 5, left: 15, right: 15, bottom: 12),
                     height: 52,
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(8),
@@ -83,36 +96,38 @@ class NoteAppearPageState extends State<NoteAppearPage> {
                                       onPressed: () {
                                         Navigator.pop(context);
                                       }),
-                                  Expanded(
-                                    child: TextField(
-                                        decoration: InputDecoration.collapsed(
-                                          hintText: "Search your notes",
-                                        ),
-                                        onChanged: (value) {}),
+                                  SizedBox(
+                                    width: 0,
                                   ),
-                                  InkWell(
-                                    child: Icon(
-                                      Icons.view_agenda_outlined,
+                                  GestureDetector(
+                                      onTap: () {
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    SearchNotes()));
+                                      },
+                                      child: Text(
+                                        "Search your notes",
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                        ),
+                                      )),
+                                  SizedBox(
+                                    width: 55,
+                                  ),
+                                  IconButton(
+                                    icon: Icon(
+                                      Icons.grid_view_outlined,
                                       color: Colors.black.withOpacity(0.7),
                                       size: 25,
                                     ),
-                                    onTap: () {
-                                      icon:
-                                      Icons.grid_view;
-                                    },
-                                  ),
-                                  SizedBox(
-                                    width: 10,
+                                    onPressed: () {},
                                   ),
                                   IconButton(
                                     icon: CircleAvatar(
-                                      backgroundColor: Colors.orange[400],
+                                      backgroundColor: Colors.grey[400],
                                       radius: 15,
-                                      child: Text(
-                                        'S',
-                                        style: TextStyle(
-                                            fontSize: 15, color: Colors.black),
-                                      ),
                                     ),
                                     onPressed: () {
                                       loginData.setBool('login', true);
@@ -122,11 +137,16 @@ class NoteAppearPageState extends State<NoteAppearPage> {
                                               builder: (context) =>
                                                   LoginScreen()));
                                     },
-                                  )
+                                  ),
                                 ])))))),
         drawer: NavigationDrawer(),
         body: StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance.collection("notes").snapshots(),
+            //pass 'Stream<QuerySnapshot>' to stream
+            stream: FirebaseFirestore.instance
+                .collection("notes")
+                .where("archive", isEqualTo: false)
+                .where("pin", isEqualTo: false)
+                .snapshots(),
             builder:
                 (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
               if (snapshot.hasError) return Text('${snapshot.error}');
@@ -136,7 +156,6 @@ class NoteAppearPageState extends State<NoteAppearPage> {
                   return Center(
                     child: CircularProgressIndicator(),
                   );
-
                 case ConnectionState.active:
                 case ConnectionState.done:
                   if (snapshot.hasError)
@@ -157,47 +176,55 @@ class NoteAppearPageState extends State<NoteAppearPage> {
                           ),
                           Text("Notes you add appear here"),
                         ]));
-                  return Container(
+                  return Center(
                       child: SingleChildScrollView(
                     child: Wrap(
                         textDirection: TextDirection.ltr,
                         direction: Axis.horizontal,
+                        //retrieve List<DocumentSnapshot> from snanpshot
                         children: snapshot.data!.docs
                             .map((DocumentSnapshot document) {
-                          return Flexible(
-                              flex: 2,
-                              fit: FlexFit.loose,
-                              child: Container(
-                                  padding: EdgeInsets.all(10.0),
-                                  margin: EdgeInsets.all(10.0),
-                                  decoration: BoxDecoration(
-                                    border: Border.all(color: Colors.black12),
-                                    borderRadius: BorderRadius.circular(10.0),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        document['title'],
-                                        style: TextStyle(
+                          String testingColor = document['color'].toString();
+                          print(testingColor);
+                          String valueString =
+                              testingColor.split('(0x')[1].split(')')[0];
+                          int value = int.parse(valueString, radix: 16);
+                          Color otherColor = new Color(value);
+                          print(otherColor);
+                          return Stack(children: [
+                            Container(
+                                width: 360,
+                                padding: EdgeInsets.fromLTRB(5, 10, 0, 15),
+                                margin: EdgeInsets.fromLTRB(10, 15, 10, 15),
+                                decoration: BoxDecoration(
+                                  color: otherColor,
+                                  border: Border.all(color: Colors.black38),
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      document['title'],
+                                      textAlign: TextAlign.start,
+                                      style: TextStyle(
                                           fontSize: 20,
-                                        ),
-                                        maxLines: 1,
-                                        softWrap: true,
-                                        overflow: TextOverflow.fade,
-                                        textAlign: TextAlign.center,
+                                          fontWeight: FontWeight.bold),
+                                      maxLines: 5,
+                                    ),
+                                    SizedBox(
+                                      height: 10,
+                                    ),
+                                    Text(
+                                      document['content'],
+                                      textAlign: TextAlign.start,
+                                      style: TextStyle(
+                                        fontSize: 16,
                                       ),
-                                      Text(
-                                        document['content'],
-                                        style: TextStyle(
-                                          fontSize: 15,
-                                        ),
-                                        maxLines: 10,
-                                        softWrap: true,
-                                        overflow: TextOverflow.fade,
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ],
-                                  )));
+                                      maxLines: 10,
+                                    ),
+                                  ],
+                                ))
+                          ]);
                         }).toList()),
                   ));
               }
@@ -209,7 +236,7 @@ class NoteAppearPageState extends State<NoteAppearPage> {
               builder: (context) => IconButton(
                   onPressed: () {
                     Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => TitlePage()));
+                        MaterialPageRoute(builder: (context) => AddNotePage()));
                   },
                   icon: Image.asset("assets/images/addIcon.png"))),
           foregroundColor: Colors.amber,
@@ -262,8 +289,6 @@ class NoteAppearPageState extends State<NoteAppearPage> {
 }
 
 class NavigationDrawer extends StatelessWidget {
-  var userEmail;
-
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -276,7 +301,7 @@ class NavigationDrawer extends StatelessWidget {
             text: 'Notes',
             onTap: () {
               Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => NoteAppearPage()));
+                  MaterialPageRoute(builder: (context) => DisplayNotePage()));
             },
           ),
           Divider(),
@@ -285,7 +310,7 @@ class NavigationDrawer extends StatelessWidget {
             text: 'Reminders',
             onTap: () {
               Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => Reminders()));
+                  MaterialPageRoute(builder: (context) => ReminderPage()));
             },
           ),
           Divider(),
@@ -298,7 +323,10 @@ class NavigationDrawer extends StatelessWidget {
           createDrawerBodyItem(
             icon: Icons.archive_outlined,
             text: 'Archive',
-            onTap: () {},
+            onTap: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => ArchivePage()));
+            },
           ),
           Divider(),
           createDrawerBodyItem(

@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-<<<<<<< HEAD
-=======
-import 'package:flutter_application_1/screens/notes_screen.dart';
->>>>>>> development
-import 'note_appear_page.dart';
+import 'add_notes.dart';
+import 'display_notes.dart';
 
-class Reminders extends StatelessWidget {
+class ReminderPage extends StatelessWidget {
   static const String routeName = '/reminders';
 
   @override
@@ -17,22 +14,13 @@ class Reminders extends StatelessWidget {
             bottom: PreferredSize(
                 preferredSize: Size.fromHeight(20),
                 child: Container(
-<<<<<<< HEAD
-=======
-                    // margin: EdgeInsets.only(left: 15, right: 15, bottom: 30),
->>>>>>> development
                     child: Padding(
                         padding: const EdgeInsets.only(top: 5, bottom: 10),
                         child: Material(
                             color: Colors.white10,
                             child: Row(
-<<<<<<< HEAD
                                 mainAxisSize: MainAxisSize.min,
                                 mainAxisAlignment: MainAxisAlignment.start,
-=======
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment: MainAxisAlignment.center,
->>>>>>> development
                                 children: [
                                   IconButton(
                                       icon: Icon(
@@ -56,9 +44,6 @@ class Reminders extends StatelessWidget {
                                         size: 25,
                                       ),
                                       color: Colors.black.withOpacity(0.7),
-<<<<<<< HEAD
-                                      onPressed: () {}),
-=======
                                       onPressed: () {
                                         TextFormField(
                                             decoration:
@@ -67,7 +52,6 @@ class Reminders extends StatelessWidget {
                                             ),
                                             onChanged: (value) {});
                                       }),
->>>>>>> development
                                   SizedBox(width: 2.0),
                                   IconButton(
                                       icon: Icon(
@@ -84,13 +68,8 @@ class Reminders extends StatelessWidget {
                 Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           Image.asset(
             "assets/images/reminder[1].png",
-<<<<<<< HEAD
             width: 120,
             height: 120,
-=======
-            width: 100,
-            height: 100,
->>>>>>> development
           ),
           SizedBox(
             height: 15,
@@ -102,14 +81,10 @@ class Reminders extends StatelessWidget {
           onPressed: () {},
           child: Builder(
               builder: (context) => IconButton(
-<<<<<<< HEAD
-                  onPressed: () {},
-=======
                   onPressed: () {
                     Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => TitlePage()));
+                        MaterialPageRoute(builder: (context) => AddNotePage()));
                   },
->>>>>>> development
                   icon: Image.asset("assets/images/addIcon.png"))),
           foregroundColor: Colors.amber,
           focusColor: Colors.white10,
