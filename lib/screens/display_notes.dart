@@ -1,13 +1,12 @@
-import 'dart:ffi';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_application_1/screens/search_notes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'add_notes.dart';
+import 'archive_notes.dart';
 import 'login.dart';
 import 'reminders.dart';
 
@@ -26,6 +25,8 @@ class DisplayNotePageState extends State<DisplayNotePage> {
       FirebaseFirestore.instance.collection('notes');
 
   late Color _color;
+  late bool archive;
+  late bool _pin;
 
   @override
   void initState() {
@@ -103,7 +104,7 @@ class DisplayNotePageState extends State<DisplayNotePage> {
                                             context,
                                             MaterialPageRoute(
                                                 builder: (context) =>
-                                                    DisplayNotePage()));
+                                                    SearchNotes()));
                                       },
                                       child: Text(
                                         "Search your notes",
@@ -140,7 +141,11 @@ class DisplayNotePageState extends State<DisplayNotePage> {
         drawer: NavigationDrawer(),
         body: StreamBuilder<QuerySnapshot>(
             //pass 'Stream<QuerySnapshot>' to stream
-            stream: FirebaseFirestore.instance.collection("notes").snapshots(),
+            stream: FirebaseFirestore.instance
+                .collection("notes")
+                .where("archive", isEqualTo: false)
+                .where("pin", isEqualTo: false)
+                .snapshots(),
             builder:
                 (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
               if (snapshot.hasError) return Text('${snapshot.error}');
@@ -212,7 +217,7 @@ class DisplayNotePageState extends State<DisplayNotePage> {
                                       document['content'],
                                       textAlign: TextAlign.start,
                                       style: TextStyle(
-                                        fontSize: 15,
+                                        fontSize: 16,
                                       ),
                                       maxLines: 10,
                                     ),
@@ -317,7 +322,10 @@ class NavigationDrawer extends StatelessWidget {
           createDrawerBodyItem(
             icon: Icons.archive_outlined,
             text: 'Archive',
-            onTap: () {},
+            onTap: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => ArchivePage()));
+            },
           ),
           Divider(),
           createDrawerBodyItem(

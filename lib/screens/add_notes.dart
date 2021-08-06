@@ -1,16 +1,12 @@
-import 'dart:developer';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_application_1/screens/user_login.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter_application_1/screens/display_notes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'apply_color_to_notes.dart';
+import 'archive_notes.dart';
 
 // ignore: must_be_immutable
 class AddNotePage extends StatefulWidget {
@@ -28,6 +24,9 @@ class AddNotePageState extends State<AddNotePage> {
   // final dateFormate = DateFormat('dd-MM');
   late DateTime pickedDate = DateTime.now();
   late TimeOfDay pickedTime = TimeOfDay.now();
+  late bool archive = false;
+  late bool _pin = false;
+  
 
   void initState() {
     super.initState();
@@ -75,14 +74,17 @@ class AddNotePageState extends State<AddNotePage> {
                                       ),
                                       color: Colors.black.withOpacity(0.7),
                                       onPressed: () {
-                                        var title = _titlecontroller.text;
-                                        var content = _contentcontroller.text;
+                                          var title = _titlecontroller.text;
+                                          var content = _contentcontroller.text;
                                         if (title.isEmpty && content.isEmpty) {
                                           print('Notes required');
                                           Navigator.pop(context);
                                         } else {
                                           print('Notes added');
+                                          print(archive);
                                           ref.add({
+                                            'archive': false,
+                                            'pin': false,
                                             'emailId': '$userEmail',
                                             'title': '${_titlecontroller.text}',
                                             'content':
@@ -99,7 +101,8 @@ class AddNotePageState extends State<AddNotePage> {
                                         size: 25,
                                       ),
                                       color: Colors.black.withOpacity(0.7),
-                                      onPressed: () {}),
+                                      onPressed: () {
+                                      }),
                                   SizedBox(width: 2.0),
                                   IconButton(
                                     icon: Icon(
@@ -155,8 +158,27 @@ class AddNotePageState extends State<AddNotePage> {
                                       ),
                                       color: Colors.black.withOpacity(0.7),
                                       onPressed: () {
-                                        Navigator.pop(context);
-                                      }),
+                                       var title = _titlecontroller.text;
+                                       var content = _contentcontroller.text; 
+                                       if (title.isEmpty && content.isEmpty){   
+                                             Navigator.push(context, MaterialPageRoute(builder: 
+                                             (context) => DisplayNotePage()));
+                                      }else{
+                                        showAlertDialog(context);
+                                        ref.add({
+                                            'archive': true,
+                                            'pin': false,
+                                            'emailId': '$userEmail',
+                                            'title': '${_titlecontroller.text}',
+                                            'content':
+                                                '${_contentcontroller.text}',
+                                            'color': '$_color',
+                                          }).whenComplete(
+                                        () => Navigator.push(context, MaterialPageRoute(builder: 
+                                        (context) => ArchivePage())));
+                                      }
+                                            }
+                            ),
                                 ])))))),
         body: Container(
             margin: EdgeInsets.only(bottom: 20),
@@ -207,7 +229,7 @@ class AddNotePageState extends State<AddNotePage> {
                 padding: EdgeInsets.all(20))),
         bottomNavigationBar: BottomAppBar(
             child: Container(
-                color: _color,
+                color: Colors.white,
                 child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
@@ -383,7 +405,7 @@ class AddNotePageState extends State<AddNotePage> {
                 borderRadius: BorderRadius.circular(10.0),
               ),
               child: Container(
-                  height: 220.0,
+                  height: 250.0,
                   width: 100.0,
                   child: Padding(
                       padding: EdgeInsets.all(12.0),
@@ -414,6 +436,9 @@ class AddNotePageState extends State<AddNotePage> {
                                   ),
                                   onTap: _pickedDate,
                                 ),
+                                Divider(
+                                  color: Colors.grey,
+                                ),
                                 ListTile(
                                   title: Text(
                                       "${pickedTime.hour}:${pickedTime.minute}",
@@ -426,16 +451,28 @@ class AddNotePageState extends State<AddNotePage> {
                                   ),
                                   onTap: _pickedTime,
                                 ),
+                                Divider(
+                                  color: Colors.grey,
+                                ),
                               ],
                             ),
                             Row(
                               children: [
-                                SizedBox(width: 150,),
+                               // SizedBox(width: 150,),
                             FlatButton(
                               onPressed: (){
                             },
+                             child: Text('Cancel',
+                            style: TextStyle(fontSize: 17),
+                            ),
+                            ),
+                            SizedBox(width: 70,),
+                             FlatButton(
+                              onPressed: (){
+                                Navigator.pop(context);
+                            },
                              child: Text('Save',
-                            style: TextStyle(fontSize: 18),
+                            style: TextStyle(fontSize: 17),
                             ),
                             color: Colors.orange,
                             ),
@@ -475,4 +512,23 @@ class AddNotePageState extends State<AddNotePage> {
         pickedTime = time!;
       });
   }
+
+  showAlertDialog(BuildContext context){
+    //set up the button
+  Widget undoButton = TextButton(onPressed: (){
+    Navigator.push(context, MaterialPageRoute(builder: (context) => DisplayNotePage()));
+  }, child: Text("undo"),
+  );
+
+    //set up the AlertDialog
+  AlertDialog alert = AlertDialog(title: Text("Note archived"),
+  actions: [
+    undoButton
+  ],);
+
+    //show the dialog
+  showDialog(context: context, builder: (BuildContext context){
+    return alert;
+  });  
+}
 }
