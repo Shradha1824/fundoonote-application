@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_application_1/screens/edit_notes.dart';
+import 'package:flutter_application_1/screens/search_notes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'add_notes.dart';
@@ -106,6 +108,10 @@ class DisplayNotePageState extends State<DisplayNotePage> {
                                         // MaterialPageRoute(
                                         //    builder: (context) =>
                                         //       CreateNewLabel()));
+                                        //   context,
+                                        //  MaterialPageRoute(
+                                        //     builder: (context) =>
+                                        //        CreateNewLabel()));
                                       },
                                       child: Text(
                                         "Search your notes",
