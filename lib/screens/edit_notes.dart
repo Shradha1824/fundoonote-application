@@ -16,13 +16,29 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'apply_color_to_notes.dart';
 
 // ignore: must_be_immutable
-class AddNotePage extends StatefulWidget {
+class EditNotePage extends StatefulWidget {
+  final String currenttitle;
+  final String currentcontent;
+  final String documentId;
+  final bool archive;
+  final bool pin;
+  final String color;
+  final String userEmail;
 
+  const EditNotePage({
+    required this.currenttitle,
+    required this.currentcontent,
+    required this.documentId,
+    required this.archive,
+    required this.pin,
+    required this.color,
+    required this.userEmail,
+  });
   @override
-  AddNotePageState createState() => AddNotePageState();
+  EditNotePageState createState() => EditNotePageState();
 }
 
-class AddNotePageState extends State<AddNotePage> {
+class EditNotePageState extends State<EditNotePage> {
   //share data on local device in form of key and value use of sharedpreference
   late String userEmail; //to store email in sharedpreference
   FocusNode myFocusNode = new FocusNode();
@@ -31,9 +47,22 @@ class AddNotePageState extends State<AddNotePage> {
   // final dateFormate = DateFormat('dd-MM');
   late DateTime pickedDate = DateTime.now();
   late TimeOfDay pickedTime = TimeOfDay.now();
+  late bool archive = false;
   late bool _pin = false;
 
+  static String? userUid;
+
+  String? id;
+
+  var documentReference;
+
   void initState() {
+    _titlecontroller = TextEditingController(
+      text: widget.currenttitle,
+    );
+    _contentcontroller = TextEditingController(
+      text: widget.currentcontent,
+    );
     super.initState();
     getLoginData();
   }
@@ -50,12 +79,14 @@ class AddNotePageState extends State<AddNotePage> {
   TextEditingController _titlecontroller = TextEditingController();
   TextEditingController _contentcontroller = TextEditingController();
 
+  CollectionReference ref = FirebaseFirestore.instance.collection('notes');
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: _color,
         appBar: AppBar(
-            backwardsCompatibility: true,
+            backwardsCompatibility: false,
             systemOverlayStyle: SystemUiOverlayStyle(statusBarColor: _color),
             backgroundColor: _color,
             elevation: 0.0,
@@ -76,29 +107,35 @@ class AddNotePageState extends State<AddNotePage> {
                                         size: 25,
                                       ),
                                       color: Colors.black.withOpacity(0.7),
-                                      onPressed: () async{
-                                         await Database.addItem(
-                                           title: _titlecontroller.text, 
-                                           content: _contentcontroller.text,
-                                           color: '$_color',
-                                           archive: false,
-                                           pin: true,
-                                           userEmail: '$userEmail', 
-                                           );
-                                           Navigator.pop(context); 
+                                      onPressed: () async {
+                                        await Database.updateItem(
+                                            title: _titlecontroller.text,
+                                            content: _contentcontroller.text,
+                                            archive: false,
+                                            pin: true,
+                                            color: '$_color',
+                                            userEmail: '$userEmail');
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    DisplayNotePage()));
                                       }),
                                   SizedBox(width: 190.0),
                                   IconButton(
-                                      icon: Icon(_pin ? Icons.push_pin : Icons.push_pin_outlined,
+                                    icon: Icon(
+                                      _pin
+                                          ? Icons.push_pin
+                                          : Icons.push_pin_outlined,
                                       size: 25,
                                       color: Colors.black.withOpacity(0.7),
-                                      ),
-                                      onPressed: (){
-                                        setState(() {
-                                          _pin = !_pin;
-                                        });
-                                      },
-                                      ),
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        _pin = !_pin;
+                                      });
+                                    },
+                                  ),
                                   SizedBox(width: 2.0),
                                   IconButton(
                                     icon: Icon(
@@ -138,9 +175,7 @@ class AddNotePageState extends State<AddNotePage> {
                                                         Icons.access_time),
                                                     title: new Text(
                                                         'Choose a date & time'),
-                                                    onTap: () {
-                                                      _showDialog(context);
-                                                    }),
+                                                    onTap: () {}),
                                               ],
                                             );
                                           });
@@ -154,60 +189,30 @@ class AddNotePageState extends State<AddNotePage> {
                                       ),
                                       color: Colors.black.withOpacity(0.7),
                                       onPressed: () {
-                                       var title = _titlecontroller.text;
-                                       var content = _contentcontroller.text; 
-                                       if (title.isEmpty && content.isEmpty){   
-                                             Navigator.push(context, MaterialPageRoute(builder: 
-                                             (context) => DisplayNotePage()));
-                                      }else{
-                                        var snackBar = SnackBar(
-                                          backgroundColor: Colors.black,
-                                    content: Row(
-                                      children: [
-                                        Text("Note Archive",
-                                    style: TextStyle(
-                                      color: Colors.white
-                                    ),
-                                    ),
-                                    SizedBox(width: 180,),
-                                    InkWell(
-                                      child:                                  
-                                    Text("Undo",
-                                    style: TextStyle(
-                                      color: Colors.orange
-                                    ),
-                                    ),
-                                    onTap: () async {
-                                       await Database.addItem(
-                                           title: _titlecontroller.text, 
-                                           content: _contentcontroller.text,
-                                           color: '$_color',
-                                           archive: true,
-                                           pin: false,
-                                           userEmail: '$userEmail', 
-                                           );
-                                         Navigator.push(context, MaterialPageRoute(builder: 
-                                        (context) => DisplayNotePage()));
-                                    },                                
-                                    )]),
-                                    duration:
-                                        Duration(seconds: 2, milliseconds: 250),
-                                  );
-                                  ScaffoldMessenger.of(context)
-                                      .showSnackBar(snackBar);
-                                        Database.addItem(
-                                           title: _titlecontroller.text, 
-                                           content: _contentcontroller.text,
-                                           color: '$_color',
-                                           archive: true,
-                                           pin: false,
-                                           userEmail: '$userEmail', 
-                                           );
-                                        () => Navigator.push(context, MaterialPageRoute(builder: 
-                                        (context) => ArchivePage()));
-                                      }
-                                            }
-                            ),
+                                        var title = _titlecontroller.text;
+                                        var content = _contentcontroller.text;
+                                        if (title.isEmpty && content.isEmpty) {
+                                          Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      DisplayNotePage()));
+                                        } else {
+                                          documentReference.update({
+                                            'archive': true,
+                                            'pin': false,
+                                            'emailId': '$userEmail',
+                                            'title': '${_titlecontroller.text}',
+                                            'content':
+                                                '${_contentcontroller.text}',
+                                            'color': '$_color',
+                                          }).whenComplete(() => Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      ArchivePage())));
+                                        }
+                                      }),
                                 ])))))),
         body: Container(
             margin: EdgeInsets.only(bottom: 20),
@@ -240,7 +245,7 @@ class AddNotePageState extends State<AddNotePage> {
                     cursorColor: Colors.black54,
                     maxLines: 10,
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 15,
                     ),
                     decoration: InputDecoration(
                         border: InputBorder.none,
@@ -421,124 +426,5 @@ class AddNotePageState extends State<AddNotePage> {
                         },
                       )
                     ]))));
-  }
-  // Show Dialog function
-  void _showDialog(context) {
-    // flutter defined function
-    showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          // return alert dialog object
-          return Dialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-              child: Container(
-                  height: 250.0,
-                  width: 100.0,
-                  child: Padding(
-                      padding: EdgeInsets.all(12.0),
-                      child: Column(
-                          children: [
-                            SizedBox(width: 10,),
-                            Text(
-                              "Add Reminder",
-                              style: TextStyle(
-                                fontSize: 20,
-                                color: Colors.black.withOpacity(0.9),
-                                fontWeight: FontWeight.w600
-                              ),
-                              textAlign: TextAlign.start,
-                            ),
-                            Column(
-                              children: <Widget>[
-                                SizedBox(height: 10, width: 10,),
-                                ListTile(
-                                  title: Text(
-                                      "${pickedDate.day} - ${pickedDate.month}",
-                                      style: TextStyle(fontSize: 18,
-                                      color: Colors.black.withOpacity(0.9)
-                                      ),
-                                      ),
-                                  trailing: Icon(Icons.keyboard_arrow_down,
-                                  color: Colors.black87.withOpacity(0.7),
-                                  ),
-                                  onTap: _pickedDate,
-                                ),
-                                Divider(
-                                  color: Colors.grey,
-                                ),
-                                ListTile(
-                                  title: Text(
-                                      "${pickedTime.hour}:${pickedTime.minute}",
-                                      style: TextStyle(fontSize: 18,
-                                      color: Colors.black.withOpacity(0.9),
-                                      ),
-                                      ),
-                                  trailing: Icon(Icons.keyboard_arrow_down,
-                                  color: Colors.black87.withOpacity(0.7)
-                                  ),
-                                  onTap: _pickedTime,
-                                ),
-                                Divider(
-                                  color: Colors.grey,
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                               // SizedBox(width: 150,),
-                            FlatButton(
-                              onPressed: (){
-                            },
-                             child: Text('Cancel',
-                            style: TextStyle(fontSize: 17),
-                            ),
-                            ),
-                            SizedBox(width: 70,),
-                             FlatButton(
-                              onPressed: (){
-                                Navigator.pop(context);
-                            },
-                             child: Text('Save',
-                            style: TextStyle(fontSize: 17),
-                            ),
-                            color: Colors.orange,
-                            ),
-                          ])]))));
-        });
-  }
-  Future _pickedDate() async {
-    DateTime? date = await showDatePicker(
-      context: context,
-      initialDate: pickedDate,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2022),
-    ).then((value) {
-      print(value)
-      setState(() {
-        pickedDate = value!;
-      });
-    });
-
-    if (date == null)
-      setState(() {
-        pickedDate = date!;
-      });
-  }
-
-  _pickedTime() async {
-    TimeOfDay? time =
-        await showTimePicker(context: context, initialTime: TimeOfDay.now())
-        .then((value) {
-          setState(() {
-            pickedTime = value!;
-          });
-        });
-    
-    if (time == null)
-      setState(() {
-        pickedTime = time!;
-      });
   }
 }
