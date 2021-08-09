@@ -10,7 +10,6 @@ import 'package:flutter_application_1/screens/display_notes.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'desplay_notes.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
