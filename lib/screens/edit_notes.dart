@@ -416,9 +416,19 @@ class EditNotePageState extends State<EditNotePage> {
                                                 backgroundColor: Colors.black,
                                                 content: Row(children: [
                                                   Text(
-                                                    "Note Archive",
+                                                    "Note moved to Bin",
                                                     style: TextStyle(
                                                         color: Colors.white),
+                                                  ),
+                                                  SizedBox(
+                                                    width: 180,
+                                                  ),
+                                                  InkWell(
+                                                    child: Text(
+                                                      "Undo",
+                                                      style: TextStyle(
+                                                          color: Colors.orange),
+                                                    ),
                                                   )
                                                 ]));
                                           }
