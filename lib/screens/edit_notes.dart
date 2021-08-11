@@ -14,25 +14,17 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'apply_color_to_notes.dart';
+import 'delete_notes.dart';
 
 // ignore: must_be_immutable
 class EditNotePage extends StatefulWidget {
-  final String currenttitle;
-  final String currentcontent;
-  final String documentId;
-  final bool archive;
-  final bool pin;
-  final String color;
-  final String userEmail;
+  DocumentSnapshot editDocument;
+  late final String title;
+  late final Color color;
+  late final String documentId;
 
-  const EditNotePage({
-    required this.currenttitle,
-    required this.currentcontent,
-    required this.documentId,
-    required this.archive,
-    required this.pin,
-    required this.color,
-    required this.userEmail,
+  EditNotePage({
+    required this.editDocument,
   });
   @override
   EditNotePageState createState() => EditNotePageState();
@@ -47,22 +39,25 @@ class EditNotePageState extends State<EditNotePage> {
   // final dateFormate = DateFormat('dd-MM');
   late DateTime pickedDate = DateTime.now();
   late TimeOfDay pickedTime = TimeOfDay.now();
-  late bool archive = false;
-  late bool _pin = false;
+  bool _pin = false;
+  bool _archive = false;
 
-  static String? userUid;
+  var otherColor;
 
-  String? id;
-
-  var documentReference;
+  bool _isDeleting = false;
 
   void initState() {
     _titlecontroller = TextEditingController(
-      text: widget.currenttitle,
+      text: widget.editDocument['title'],
     );
     _contentcontroller = TextEditingController(
-      text: widget.currentcontent,
+      text: widget.editDocument['content'],
     );
+    String testingColorString = widget.editDocument['color'].toString();
+    String valueString = testingColorString.split('(0x')[1].split(')')[0];
+    int value = int.parse(valueString, radix: 16);
+    Color otherColor = new Color(value);
+    _color = otherColor;
     super.initState();
     getLoginData();
   }
@@ -76,17 +71,16 @@ class EditNotePageState extends State<EditNotePage> {
     });
   }
 
+  TextEditingController _colorController = TextEditingController();
   TextEditingController _titlecontroller = TextEditingController();
   TextEditingController _contentcontroller = TextEditingController();
-
-  CollectionReference ref = FirebaseFirestore.instance.collection('notes');
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: _color,
         appBar: AppBar(
-            backwardsCompatibility: false,
+            backwardsCompatibility: true,
             systemOverlayStyle: SystemUiOverlayStyle(statusBarColor: _color),
             backgroundColor: _color,
             elevation: 0.0,
@@ -108,13 +102,17 @@ class EditNotePageState extends State<EditNotePage> {
                                       ),
                                       color: Colors.black.withOpacity(0.7),
                                       onPressed: () async {
-                                        await Database.updateItem(
-                                            title: _titlecontroller.text,
-                                            content: _contentcontroller.text,
-                                            archive: false,
-                                            pin: true,
-                                            color: '$_color',
-                                            userEmail: '$userEmail');
+                                        await widget.editDocument.reference
+                                            .update({
+                                          //'docId': widget.documentId,
+                                          'title': _titlecontroller.text,
+                                          'content': _contentcontroller.text,
+                                          'archive': _archive,
+                                          'delete': _isDeleting,
+                                          'pin': _pin,
+                                          'color': '$_color',
+                                          'userEmail': '$userEmail'
+                                        });
                                         Navigator.push(
                                             context,
                                             MaterialPageRoute(
@@ -189,6 +187,9 @@ class EditNotePageState extends State<EditNotePage> {
                                       ),
                                       color: Colors.black.withOpacity(0.7),
                                       onPressed: () {
+                                        setState(() {
+                                          _archive = !_archive;
+                                        });
                                         var title = _titlecontroller.text;
                                         var content = _contentcontroller.text;
                                         if (title.isEmpty && content.isEmpty) {
@@ -198,19 +199,21 @@ class EditNotePageState extends State<EditNotePage> {
                                                   builder: (context) =>
                                                       DisplayNotePage()));
                                         } else {
-                                          documentReference.update({
-                                            'archive': true,
-                                            'pin': false,
-                                            'emailId': '$userEmail',
-                                            'title': '${_titlecontroller.text}',
-                                            'content':
-                                                '${_contentcontroller.text}',
+                                          widget.editDocument.reference.update({
+                                            //'docId': widget.documentId,
+                                            'title': _titlecontroller.text,
+                                            'content': _contentcontroller.text,
+                                            'archive': _archive,
+                                            'delete': _isDeleting,
+                                            'pin': _pin,
                                             'color': '$_color',
-                                          }).whenComplete(() => Navigator.push(
+                                            'userEmail': '$userEmail'
+                                          });
+                                          Navigator.push(
                                               context,
                                               MaterialPageRoute(
                                                   builder: (context) =>
-                                                      ArchivePage())));
+                                                      DisplayNotePage()));
                                         }
                                       }),
                                 ])))))),
@@ -262,6 +265,7 @@ class EditNotePageState extends State<EditNotePage> {
                 ]),
                 padding: EdgeInsets.all(20))),
         bottomNavigationBar: BottomAppBar(
+            color: _color,
             child: Container(
                 color: Colors.white,
                 child: Row(
@@ -384,12 +388,41 @@ class EditNotePageState extends State<EditNotePage> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: <Widget>[
                                     ListTile(
-                                      leading: new Icon(Icons.delete_sharp),
-                                      title: new Text('Delete'),
-                                      onTap: () {
-                                        Navigator.pop(context);
-                                      },
-                                    ),
+                                        leading: new Icon(Icons.delete_sharp),
+                                        title: new Text('Delete'),
+                                        onTap: () async {
+                                          setState(() {
+                                            _isDeleting = !_isDeleting;
+                                          });
+                                          {
+                                            await widget.editDocument.reference
+                                                .update({
+                                              //'docId': widget.documentId,
+                                              'title': _titlecontroller.text,
+                                              'content':
+                                                  _contentcontroller.text,
+                                              'archive': _archive,
+                                              'delete': _isDeleting,
+                                              'pin': _pin,
+                                              'color': '$_color',
+                                              'userEmail': '$userEmail'
+                                            });
+                                            Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        DeleteNotesPage()));
+                                            var snackBar = SnackBar(
+                                                backgroundColor: Colors.black,
+                                                content: Row(children: [
+                                                  Text(
+                                                    "Note Archive",
+                                                    style: TextStyle(
+                                                        color: Colors.white),
+                                                  )
+                                                ]));
+                                          }
+                                        }),
                                     ListTile(
                                       leading: new Icon(Icons.filter_none),
                                       title: new Text('Make a copy'),

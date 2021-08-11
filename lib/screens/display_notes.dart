@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'add_notes.dart';
 import 'archive_notes.dart';
+import 'delete_notes.dart';
 import 'login.dart';
 import 'reminders.dart';
 
@@ -23,9 +24,11 @@ class DisplayNotePageState extends State<DisplayNotePage> {
   CollectionReference _collectionRef =
       FirebaseFirestore.instance.collection('notes');
 
-  late Color _color;
-  late bool archive;
+  late Color _color = Colors.white;
+  late bool archive = false;
   late bool _pin;
+
+  var title;
 
   @override
   void initState() {
@@ -60,10 +63,10 @@ class DisplayNotePageState extends State<DisplayNotePage> {
     return Scaffold(
         appBar: AppBar(
             elevation: 0.0,
-            backwardsCompatibility: true,
+            backwardsCompatibility: false,
             systemOverlayStyle:
-                SystemUiOverlayStyle(statusBarColor: Colors.white),
-            backgroundColor: Colors.white,
+                SystemUiOverlayStyle(statusBarColor: Colors.white10),
+            backgroundColor: Colors.white10,
             bottom: PreferredSize(
                 preferredSize: Size.fromHeight(20),
                 child: Container(
@@ -102,7 +105,7 @@ class DisplayNotePageState extends State<DisplayNotePage> {
                                   ),
                                   GestureDetector(
                                       onTap: () {
-                                        //Navigator.push(
+                                        // Navigator.push(
                                         //   context,
                                         //  MaterialPageRoute(
                                         //     builder: (context) =>
@@ -146,6 +149,7 @@ class DisplayNotePageState extends State<DisplayNotePage> {
             stream: FirebaseFirestore.instance
                 .collection("notes")
                 .where("archive", isEqualTo: false)
+                .where("delete", isEqualTo: false)
                 .snapshots(),
             builder:
                 (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -176,8 +180,7 @@ class DisplayNotePageState extends State<DisplayNotePage> {
                           ),
                           Text("Notes you add appear here"),
                         ]));
-                  return Center(
-                      child: SingleChildScrollView(
+                  return SingleChildScrollView(
                     child: Wrap(
                         textDirection: TextDirection.ltr,
                         direction: Axis.horizontal,
@@ -191,59 +194,65 @@ class DisplayNotePageState extends State<DisplayNotePage> {
                           int value = int.parse(valueString, radix: 16);
                           Color otherColor = new Color(value);
                           print(otherColor);
-                          return Stack(children: [
-                            InkWell(
-                              child: Container(
-                                  width: 360,
-                                  padding: EdgeInsets.fromLTRB(5, 15, 0, 15),
-                                  margin: EdgeInsets.fromLTRB(10, 20, 10, 15),
-                                  decoration: BoxDecoration(
-                                    color: otherColor,
-                                    border: Border.all(color: Colors.black38),
-                                    borderRadius: BorderRadius.circular(8.0),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        document['title'],
-                                        textAlign: TextAlign.start,
-                                        style: TextStyle(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.bold),
-                                        maxLines: 5,
-                                      ),
-                                      SizedBox(
-                                        height: 10,
-                                      ),
-                                      Text(
-                                        document['content'],
-                                        textAlign: TextAlign.start,
-                                        style: TextStyle(
-                                          fontSize: 16,
+                          return InkWell(
+                              child: Column(children: [
+                                // Container(
+                                //   margin: EdgeInsets.only(top: 5, left: 25),
+                                //  alignment: Alignment.centerLeft,
+                                // child: Text("OTHERS")),
+                                Container(
+                                    width: 360,
+                                    padding: EdgeInsets.all(15),
+                                    margin: EdgeInsets.fromLTRB(15, 20, 10, 15),
+                                    decoration: BoxDecoration(
+                                        color: otherColor,
+                                        border:
+                                            Border.all(color: Colors.black38),
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
+                                        boxShadow: [
+                                          BoxShadow(
+                                              color: Colors.grey,
+                                              blurRadius: 1,
+                                              spreadRadius: 0.0,
+                                              offset: Offset(2.0, 2.0))
+                                        ]),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          document['title'],
+                                          textAlign: TextAlign.start,
+                                          style: TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.bold),
+                                          maxLines: 5,
                                         ),
-                                        maxLines: 10,
-                                      ),
-                                    ],
-                                  )),
+                                        SizedBox(
+                                          height: 10,
+                                        ),
+                                        Text(
+                                          document['content'],
+                                          textAlign: TextAlign.start,
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                          ),
+                                          maxLines: 10,
+                                        ),
+                                      ],
+                                    ))
+                              ]),
                               onTap: () {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) => EditNotePage(
-                                              currenttitle: document['title'],
-                                              currentcontent:
-                                                  document['content'],
-                                              archive: document['archive'],
-                                              pin: document['pin'],
-                                              color: document['color'],
-                                              userEmail: document['userEmail'],
-                                              documentId: document['docId'],
+                                              editDocument: document,
                                             )));
-                              },
-                            )
-                          ]);
+                              });
                         }).toList()),
-                  ));
+                  );
               }
             }),
         floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
@@ -303,23 +312,6 @@ class DisplayNotePageState extends State<DisplayNotePage> {
               ),
             )));
   }
-
-  //static Future<void> updateData() async {
-  //CollectionReference _collectionRef =
-  //    FirebaseFirestore.instance.collection('notes');
-  // DocumentReference documentReference =
-  //    _collectionRef.doc(Useruid).collection('notes').doc(docId);
-
-//    Map<String, dynamic> data = <String, dynamic>{
-  //     title: _titlecontroller.text,
-  //    "content": content,
-  // };
-
-  // await documentReference
-  //    .update(data)
-  //    .whenComplete(() => print("notes updated"))
-  //    .catchError((e) => print(e));
-  // }
 }
 
 class NavigationDrawer extends StatelessWidget {
@@ -366,7 +358,10 @@ class NavigationDrawer extends StatelessWidget {
           createDrawerBodyItem(
             icon: Icons.delete_outline,
             text: 'Deleted',
-            onTap: () {},
+            onTap: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => DeleteNotesPage()));
+            },
           ),
           Divider(),
         ],
