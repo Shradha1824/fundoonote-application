@@ -9,7 +9,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_application_1/screens/archive_notes.dart';
 import 'package:flutter_application_1/screens/display_notes.dart';
-import 'package:flutter_application_1/screens/user_login.dart';
 import 'package:flutter_application_1/utils/firebase.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
