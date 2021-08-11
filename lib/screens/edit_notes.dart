@@ -419,6 +419,16 @@ class EditNotePageState extends State<EditNotePage> {
                                                     "Note Archive",
                                                     style: TextStyle(
                                                         color: Colors.white),
+                                                  ),
+                                                  SizedBox(
+                                                    width: 180,
+                                                  ),
+                                                  InkWell(
+                                                    child: Text(
+                                                      "Undo",
+                                                      style: TextStyle(
+                                                          color: Colors.orange),
+                                                    ),
                                                   )
                                                 ]));
                                           }
