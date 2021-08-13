@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_application_1/screens/edit_notes.dart';
@@ -25,10 +27,9 @@ class DisplayNotePageState extends State<DisplayNotePage> {
       FirebaseFirestore.instance.collection('notes');
 
   late Color _color = Colors.white;
-  late bool archive = false;
+  bool archive = false;
   late bool _pin;
-
-  var title;
+  bool _gridView = false;
 
   @override
   void initState() {
@@ -105,11 +106,11 @@ class DisplayNotePageState extends State<DisplayNotePage> {
                                   ),
                                   GestureDetector(
                                       onTap: () {
-                                        // Navigator.push(
-                                        //   context,
-                                        //  MaterialPageRoute(
-                                        //     builder: (context) =>
-                                        //        CreateNewLabel()));
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    CreateNewLabel()));
                                       },
                                       child: Text(
                                         "Search your notes",
@@ -122,11 +123,17 @@ class DisplayNotePageState extends State<DisplayNotePage> {
                                   ),
                                   IconButton(
                                     icon: Icon(
-                                      Icons.grid_view_outlined,
+                                      _gridView
+                                          ? Icons.grid_view_outlined
+                                          : Icons.view_agenda_outlined,
                                       color: Colors.black.withOpacity(0.7),
                                       size: 25,
                                     ),
-                                    onPressed: () {},
+                                    onPressed: () {
+                                      setState(() {
+                                        _gridView = !_gridView;
+                                      });
+                                    },
                                   ),
                                   IconButton(
                                     icon: CircleAvatar(
@@ -180,79 +187,79 @@ class DisplayNotePageState extends State<DisplayNotePage> {
                           ),
                           Text("Notes you add appear here"),
                         ]));
-                  return SingleChildScrollView(
-                    child: Wrap(
-                        textDirection: TextDirection.ltr,
-                        direction: Axis.horizontal,
-                        //retrieve List<DocumentSnapshot> from snanpshot
-                        children: snapshot.data!.docs
-                            .map((DocumentSnapshot document) {
-                          String testingColor = document['color'].toString();
-                          print(testingColor);
-                          String valueString =
-                              testingColor.split('(0x')[1].split(')')[0];
-                          int value = int.parse(valueString, radix: 16);
-                          Color otherColor = new Color(value);
-                          print(otherColor);
-                          return InkWell(
-                              child: Column(children: [
-                                // Container(
-                                //   margin: EdgeInsets.only(top: 5, left: 25),
-                                //  alignment: Alignment.centerLeft,
-                                // child: Text("OTHERS")),
-                                Container(
-                                    width: 360,
-                                    padding: EdgeInsets.all(15),
-                                    margin: EdgeInsets.fromLTRB(15, 20, 10, 15),
-                                    decoration: BoxDecoration(
-                                        color: otherColor,
-                                        border:
-                                            Border.all(color: Colors.black38),
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                        boxShadow: [
-                                          BoxShadow(
-                                              color: Colors.grey,
-                                              blurRadius: 1,
-                                              spreadRadius: 0.0,
-                                              offset: Offset(2.0, 2.0))
-                                        ]),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          document['title'],
-                                          textAlign: TextAlign.start,
-                                          style: TextStyle(
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.bold),
-                                          maxLines: 5,
-                                        ),
-                                        SizedBox(
-                                          height: 10,
-                                        ),
-                                        Text(
-                                          document['content'],
-                                          textAlign: TextAlign.start,
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                          ),
-                                          maxLines: 10,
-                                        ),
-                                      ],
-                                    ))
-                              ]),
+                  if (_gridView == true) {
+                    return SingleChildScrollView(
+                      child: Wrap(
+                          textDirection: TextDirection.ltr,
+                          direction: Axis.horizontal,
+                          //retrieve List<DocumentSnapshot> from snanpshot
+                          children: snapshot.data!.docs
+                              .map((DocumentSnapshot document) {
+                            String testingColor = document['color'].toString();
+                            print(testingColor);
+                            String valueString =
+                                testingColor.split('(0x')[1].split(')')[0];
+                            int value = int.parse(valueString, radix: 16);
+                            Color otherColor = new Color(value);
+                            print(otherColor);
+                            return InkWell(
                               onTap: () {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) => EditNotePage(
-                                              editDocument: document,
-                                            )));
-                              });
-                        }).toList()),
-                  );
+                                            editDocument: document)));
+                              },
+                              child: GridView.builder(
+                                  shrinkWrap: true,
+                                  itemCount: 2,
+                                  gridDelegate:
+                                      SliverGridDelegateWithFixedCrossAxisCount(
+                                          // maxCrossAxisExtent: 250,
+                                          // childAspectRatio: 2 / 1,
+                                          crossAxisCount: 2,
+                                          //crossAxisSpacing: 1,
+                                          mainAxisSpacing: 10),
+                                  itemBuilder: (BuildContext context, index) {
+                                    return Container(
+                                      padding: EdgeInsets.all(2),
+                                      margin: EdgeInsets.all(10),
+                                      decoration: BoxDecoration(
+                                        color: otherColor,
+                                        border: Border.all(color: Colors.black),
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            // Padding(padding: EdgeInsets.all(5)),
+                                            Text(
+                                              document['title'],
+                                              textAlign: TextAlign.start,
+                                              style: TextStyle(
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.bold),
+                                              maxLines: 5,
+                                            ),
+                                            Text(
+                                              document['content'],
+                                              textAlign: TextAlign.start,
+                                              style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight:
+                                                      FontWeight.normal),
+                                              maxLines: 10,
+                                            ),
+                                          ]),
+                                    );
+                                  }),
+                            );
+                          }).toList()),
+                    );
+                  } else {
+                    return listView();
+                  }
               }
             }),
         floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
@@ -311,6 +318,60 @@ class DisplayNotePageState extends State<DisplayNotePage> {
                 ],
               ),
             )));
+  }
+
+  Widget listView() {
+    return Scaffold(
+      body: StreamBuilder<QuerySnapshot>(
+        //pass 'Stream<QuerySnapshot>' to stream
+        stream: FirebaseFirestore.instance
+            .collection("notes")
+            .where("archive", isEqualTo: false)
+            .where("delete", isEqualTo: false)
+            .snapshots(),
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (!snapshot.hasData) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+          return ListView(
+            children: snapshot.data!.docs.map((doc) {
+              String testingColor = doc['color'].toString();
+              print(testingColor);
+              String valueString = testingColor.split('(0x')[1].split(')')[0];
+              int value = int.parse(valueString, radix: 16);
+              Color otherColor = new Color(value);
+              print(otherColor);
+              return Container(
+                padding: EdgeInsets.all(10),
+                margin: EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: otherColor,
+                  border: Border.all(color: Colors.black),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: ListTile(
+                  title: Text(
+                    doc['title'],
+                    textAlign: TextAlign.start,
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    maxLines: 5,
+                  ),
+                  subtitle: Text(
+                    doc['content'],
+                    textAlign: TextAlign.start,
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
+                    maxLines: 10,
+                  ),
+                ),
+              );
+            }).toList(),
+          );
+        },
+      ),
+    );
   }
 }
 
