@@ -1,11 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_application_1/screens/edit_notes.dart';
 import 'package:flutter_application_1/screens/search_notes.dart';
+import 'package:flutter_application_1/utils/upload_pick.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'add_notes.dart';
@@ -15,6 +18,10 @@ import 'login.dart';
 import 'reminders.dart';
 
 class DisplayNotePage extends StatefulWidget {
+  var document;
+
+  var items;
+
   @override
   DisplayNotePageState createState() => DisplayNotePageState();
 }
@@ -46,9 +53,6 @@ class DisplayNotePageState extends State<DisplayNotePage> {
       print('_color: $_color');
     });
   }
-
-  TextEditingController _titlecontroller = TextEditingController();
-  TextEditingController _contentcontroller = TextEditingController();
 
   Future<void> getNotes() async {
     // Get docs from collection reference
@@ -105,19 +109,19 @@ class DisplayNotePageState extends State<DisplayNotePage> {
                                     width: 0,
                                   ),
                                   GestureDetector(
-                                      // onTap: () {
-                                      // Navigator.push(
-                                      //   context,
-                                      // MaterialPageRoute(
-                                      //   builder: (context) =>
-                                      //     CreateNewLabel()));
-                                      // },
+                                      onTap: () {
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    CreateNewLabel()));
+                                      },
                                       child: Text(
-                                    "Search your notes",
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                    ),
-                                  )),
+                                        "Search your notes",
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                        ),
+                                      )),
                                   SizedBox(
                                     width: 55,
                                   ),
@@ -136,132 +140,26 @@ class DisplayNotePageState extends State<DisplayNotePage> {
                                     },
                                   ),
                                   IconButton(
-                                    icon: CircleAvatar(
-                                      backgroundColor: Colors.grey[400],
-                                      radius: 15,
-                                    ),
-                                    onPressed: () {
-                                      loginData.setBool('login', true);
-                                      Navigator.pushReplacement(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  LoginScreen()));
-                                    },
-                                  ),
+                                      icon: CircleAvatar(
+                                        backgroundColor: Colors.grey[400],
+                                        radius: 15,
+                                      ),
+                                      onPressed: () {
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    UploadedPickPage()));
+                                        // loginData.setBool('login', true);
+                                        // Navigator.pushReplacement(
+                                        //    context,
+                                        //   MaterialPageRoute(
+                                        //      builder: (context) =>
+                                      } //         LoginScreen()));
+                                      ),
                                 ])))))),
         drawer: NavigationDrawer(),
-        body: StreamBuilder<QuerySnapshot>(
-            //pass 'Stream<QuerySnapshot>' to stream
-            stream: FirebaseFirestore.instance
-                .collection("notes")
-                .where("archive", isEqualTo: false)
-                .where("delete", isEqualTo: false)
-                .snapshots(),
-            builder:
-                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (snapshot.hasError) return Text('${snapshot.error}');
-              switch (snapshot.connectionState) {
-                case ConnectionState.none:
-                case ConnectionState.waiting:
-                  return Center(
-                    child: CircularProgressIndicator(),
-                  );
-                case ConnectionState.active:
-                case ConnectionState.done:
-                  if (snapshot.hasError)
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  if (!snapshot.hasData)
-                    return Center(
-                        child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                          Image.asset(
-                            "assets/images/bulb[1].png",
-                            width: 200,
-                            height: 100,
-                          ),
-                          SizedBox(
-                            height: 15,
-                          ),
-                          Text("Notes you add appear here"),
-                        ]));
-                  if (_gridView == true) {
-                    return SingleChildScrollView(
-                      child: Wrap(
-                          textDirection: TextDirection.ltr,
-                          direction: Axis.horizontal,
-                          //retrieve List<DocumentSnapshot> from snanpshot
-                          children: snapshot.data!.docs
-                              .map((DocumentSnapshot document) {
-                            String testingColor = document['color'].toString();
-                            print(testingColor);
-                            String valueString =
-                                testingColor.split('(0x')[1].split(')')[0];
-                            int value = int.parse(valueString, radix: 16);
-                            Color otherColor = new Color(value);
-                            print(otherColor);
-                            return InkWell(
-                              onTap: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => EditNotePage(
-                                            editDocument: document)));
-                              },
-                              child: GridView.builder(
-                                  shrinkWrap: true,
-                                  itemCount: 2,
-                                  gridDelegate:
-                                      SliverGridDelegateWithFixedCrossAxisCount(
-                                          // maxCrossAxisExtent: 250,
-                                          // childAspectRatio: 2 / 1,
-                                          crossAxisCount: 2,
-                                          //crossAxisSpacing: 1,
-                                          mainAxisSpacing: 10),
-                                  itemBuilder: (BuildContext context, index) {
-                                    return Container(
-                                      padding: EdgeInsets.all(2),
-                                      margin: EdgeInsets.all(10),
-                                      decoration: BoxDecoration(
-                                        color: otherColor,
-                                        border: Border.all(color: Colors.black),
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            // Padding(padding: EdgeInsets.all(5)),
-                                            Text(
-                                              document['title'],
-                                              textAlign: TextAlign.start,
-                                              style: TextStyle(
-                                                  fontSize: 20,
-                                                  fontWeight: FontWeight.bold),
-                                              maxLines: 5,
-                                            ),
-                                            Text(
-                                              document['content'],
-                                              textAlign: TextAlign.start,
-                                              style: TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight:
-                                                      FontWeight.normal),
-                                              maxLines: 10,
-                                            ),
-                                          ]),
-                                    );
-                                  }),
-                            );
-                          }).toList()),
-                    );
-                  } else {
-                    return listView();
-                  }
-              }
-            }),
+        body: changeView(),
         floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
         floatingActionButton: FloatingActionButton(
           onPressed: () {},
@@ -343,35 +241,147 @@ class DisplayNotePageState extends State<DisplayNotePage> {
               int value = int.parse(valueString, radix: 16);
               Color otherColor = new Color(value);
               print(otherColor);
-              return Container(
-                padding: EdgeInsets.all(10),
-                margin: EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: otherColor,
-                  border: Border.all(color: Colors.black),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: ListTile(
-                  title: Text(
-                    doc['title'],
-                    textAlign: TextAlign.start,
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    maxLines: 5,
-                  ),
-                  subtitle: Text(
-                    doc['content'],
-                    textAlign: TextAlign.start,
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
-                    maxLines: 10,
-                  ),
-                ),
-              );
+              return Padding(
+                  padding: EdgeInsets.all(0),
+                  child: InkWell(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    EditNotePage(editDocument: doc)));
+                      },
+                      child: Container(
+                        padding: EdgeInsets.all(15),
+                        margin: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                            color: otherColor,
+                            border: Border.all(
+                                color: Colors.black54.withOpacity(0.2)),
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                  color: Colors.grey,
+                                  blurRadius: 1,
+                                  spreadRadius: 0.0,
+                                  offset: Offset(2.0, 2.0))
+                            ]),
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                doc['title'],
+                                textAlign: TextAlign.start,
+                                style: TextStyle(
+                                    fontSize: 20, fontWeight: FontWeight.bold),
+                                maxLines: 5,
+                              ),
+                              SizedBox(
+                                height: 6,
+                              ),
+                              Text(
+                                doc['content'],
+                                textAlign: TextAlign.start,
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.normal),
+                                maxLines: 10,
+                              ),
+                            ]),
+                      )));
             }).toList(),
           );
         },
       ),
     );
+  }
+
+  Widget gridView() {
+    return Scaffold(
+      body: StreamBuilder<QuerySnapshot>(
+        //pass 'Stream<QuerySnapshot>' to stream
+        stream: FirebaseFirestore.instance
+            .collection("notes")
+            .where("archive", isEqualTo: false)
+            .where("delete", isEqualTo: false)
+            .snapshots(),
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (!snapshot.hasData) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+          return GridView(
+            gridDelegate:
+                SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+            children: snapshot.data!.docs.map((doc) {
+              String testingColor = doc['color'].toString();
+              print(testingColor);
+              String valueString = testingColor.split('(0x')[1].split(')')[0];
+              int value = int.parse(valueString, radix: 16);
+              Color otherColor = new Color(value);
+              print(otherColor);
+              return Padding(
+                  padding: EdgeInsets.all(0),
+                  child: InkWell(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    EditNotePage(editDocument: doc)));
+                      },
+                      child: Container(
+                        padding: EdgeInsets.all(15),
+                        margin: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                            color: otherColor,
+                            border: Border.all(
+                                color: Colors.black54.withOpacity(0.2)),
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                  color: Colors.grey,
+                                  blurRadius: 1,
+                                  spreadRadius: 0.0,
+                                  offset: Offset(2.0, 2.0))
+                            ]),
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                doc['title'],
+                                textAlign: TextAlign.start,
+                                style: TextStyle(
+                                    fontSize: 20, fontWeight: FontWeight.bold),
+                                maxLines: 5,
+                              ),
+                              SizedBox(
+                                height: 6,
+                              ),
+                              Text(
+                                doc['content'],
+                                textAlign: TextAlign.start,
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.normal),
+                                maxLines: 10,
+                              ),
+                            ]),
+                      )));
+            }).toList(),
+          );
+        },
+      ),
+    );
+  }
+
+  changeView() {
+    if (_gridView == false) {
+      return gridView();
+    } else {
+      return listView();
+    }
   }
 }
 
@@ -440,8 +450,6 @@ class NavigationDrawer extends StatelessWidget {
                 color: Colors.black,
                 fontSize: 20.0,
                 fontWeight: FontWeight.w500,
-                //foreground: Paint()
-                // shadows:
               ))),
     );
   }
