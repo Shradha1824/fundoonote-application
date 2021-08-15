@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_application_1/screens/edit_notes.dart';
 import 'package:flutter_application_1/screens/search_notes.dart';
-import 'package:flutter_application_1/utils/upload_pick.dart';
+import 'package:flutter_application_1/utils/upload_image.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -109,19 +109,19 @@ class DisplayNotePageState extends State<DisplayNotePage> {
                                     width: 0,
                                   ),
                                   GestureDetector(
-                                      onTap: () {
-                                        Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    CreateNewLabel()));
-                                      },
+                                      //onTap: () {
+                                      //Navigator.push(
+                                      //  context,
+                                      //  MaterialPageRoute(
+                                      ///     builder: (context) =>
+                                      //      CreateNewLabel()));
+                                      //},
                                       child: Text(
-                                        "Search your notes",
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                        ),
-                                      )),
+                                    "Search your notes",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    ),
+                                  )),
                                   SizedBox(
                                     width: 55,
                                   ),
