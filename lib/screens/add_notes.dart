@@ -1,8 +1,3 @@
-import 'dart:developer';
-import 'dart:ffi';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -10,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_application_1/screens/archive_notes.dart';
 import 'package:flutter_application_1/screens/display_notes.dart';
 import 'package:flutter_application_1/utils/firebase.dart';
-import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'apply_color_to_notes.dart';
