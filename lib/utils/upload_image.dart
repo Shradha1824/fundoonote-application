@@ -95,7 +95,7 @@ class UploadedPickPageState extends State<UploadedPickPage> {
     }
   }
 
-  getDocumentandUpdateDoc() {
+  getDocandUpdateDoc() {
     FirebaseFirestore.instance
         .collection('users')
         .get()
@@ -194,7 +194,7 @@ class UploadedPickPageState extends State<UploadedPickPage> {
             ),
             FlatButton(
                 onPressed: () {
-                  getDocumentandUpdateDoc();
+                  getDocandUpdateDoc();
                 },
                 //updateUrlInFirebase();
                 child: Container(
