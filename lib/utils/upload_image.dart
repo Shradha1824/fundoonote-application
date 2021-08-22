@@ -70,7 +70,7 @@ class UploadedPickPageState extends State<UploadedPickPage> {
   final _storage = FirebaseStorage.instance;
   final _picker = ImagePicker();
 
-  pickImage() async {
+  pickAndUploadImage() async {
     File _imageFile;
     //select Image
     final pickedFile = (await _picker.getImage(source: ImageSource.gallery))!;
@@ -170,7 +170,7 @@ class UploadedPickPageState extends State<UploadedPickPage> {
             ),
             FlatButton(
                 onPressed: () {
-                  pickImage();
+                  pickAndUploadImage();
                 },
                 child: Container(
                   width: 300,
