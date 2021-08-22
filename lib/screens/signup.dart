@@ -1,17 +1,24 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/main.dart';
-import 'package:flutter_application_1/screens/login.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class SignUp extends StatelessWidget {
+
+import 'login.dart';
+
+class SignUpScreen extends StatefulWidget {
+  SignUpScreenState createState() => SignUpScreenState();
+}
+
+class SignUpScreenState extends State<SignUpScreen> {
   GlobalKey<FormState> formkey = GlobalKey<FormState>();
   bool rememberMe = false;
 
   final databaseReference = FirebaseFirestore.instance;
-
   var showErrorMessage = false;
 
   void validate() async {
@@ -154,9 +161,6 @@ class SignUp extends StatelessWidget {
                                   text: 'Terms of service',
                                   style: TextStyle(
                                       color: Colors.blue, fontSize: 15),
-                                  //  recognizer: TapGestureRecognizer().onTap = (){
-                                  //    Navigator.push(context, MaterialPageRoute(builder: (context) => SignUp()));
-                                  // }
                                 )
                               ]),
                         )
@@ -175,6 +179,7 @@ class SignUp extends StatelessWidget {
                             else {
                               setState(() => showErrorMessage = false);
                             }
+
                             Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
@@ -183,5 +188,3 @@ class SignUp extends StatelessWidget {
                     ])))));
   }
 }
-
-void setState(bool Function() param0) {}

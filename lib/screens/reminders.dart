@@ -3,7 +3,6 @@ import 'add_notes.dart';
 import 'display_notes.dart';
 
 class ReminderPage extends StatelessWidget {
-  static const String routeName = '/reminders';
 
   @override
   Widget build(BuildContext context) {
@@ -14,13 +13,14 @@ class ReminderPage extends StatelessWidget {
             bottom: PreferredSize(
                 preferredSize: Size.fromHeight(20),
                 child: Container(
+                    // margin: EdgeInsets.only(left: 15, right: 15, bottom: 30),
                     child: Padding(
                         padding: const EdgeInsets.only(top: 5, bottom: 10),
                         child: Material(
                             color: Colors.white10,
                             child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.max,
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   IconButton(
                                       icon: Icon(
@@ -68,8 +68,8 @@ class ReminderPage extends StatelessWidget {
                 Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           Image.asset(
             "assets/images/reminder[1].png",
-            width: 120,
-            height: 120,
+            width: 100,
+            height: 100,
           ),
           SizedBox(
             height: 15,

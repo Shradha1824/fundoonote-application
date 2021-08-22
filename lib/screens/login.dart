@@ -6,9 +6,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/screens/display_notes.dart';
+import 'package:flutter_application_1/utils/firebase.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'display_notes.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -16,14 +18,20 @@ class LoginScreen extends StatefulWidget {
 }
 
 class LoginScreenState extends State<LoginScreen> {
+  FocusNode myFocusNode = new FocusNode();
+  FocusNode myFocusEmail = new FocusNode();
+
   GlobalKey<FormState> formkey = GlobalKey<FormState>();
   final databaseReference = FirebaseFirestore.instance;
   CollectionReference _collectionRef =
       FirebaseFirestore.instance.collection('users');
+
   late bool _passwordVisible;
 
   late SharedPreferences loginData; //create object for sharedPreference
-  late bool newUser; //to check whether user is new or already existing
+  late bool newUser;
+
+  String? _image;
 
   @override
   void initState() {
@@ -66,8 +74,13 @@ class LoginScreenState extends State<LoginScreen> {
     return Scaffold(
         appBar: AppBar(
           centerTitle: true,
-          title: Text("Login"),
+          title: Text(
+            'Login',
+            style:
+                TextStyle(color: Colors.black87, fontWeight: FontWeight.w700),
+          ),
           backgroundColor: Color(0xFFFFA726),
+          //iconTheme: IconThemeData(color: Colors.orange),
         ),
         body: SingleChildScrollView(
             padding: EdgeInsets.only(left: 30, right: 30, top: 15),
@@ -98,9 +111,23 @@ class LoginScreenState extends State<LoginScreen> {
                         Padding(padding: EdgeInsets.all(10)),
                         TextFormField(
                             controller: _emailidController,
+                            cursorColor: Colors.orange,
+                            focusNode: myFocusEmail,
                             decoration: InputDecoration(
-                                labelText: 'Email',
-                                border: OutlineInputBorder()),
+                              labelText: 'Email',
+                              hintText: 'Enter your email',
+                              labelStyle: TextStyle(color: Colors.orange),
+                              border: OutlineInputBorder(),
+                              suffixIcon: Icon(
+                                Icons.email,
+                                color: Colors.orange,
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: myFocusNode.hasFocus
+                                          ? Colors.orange
+                                          : Colors.orange)),
+                            ),
                             validator: MultiValidator([
                               EmailValidator(
                                   errorText: "Please Enter Valid Email"),
@@ -109,16 +136,28 @@ class LoginScreenState extends State<LoginScreen> {
                             ])),
                         Padding(padding: EdgeInsets.all(15)),
                         TextFormField(
-                            obscureText: !_passwordVisible,
+                            autofocus: false,
+                            obscureText: true,
                             controller: _passwordController,
+                            cursorColor: Colors.orange,
+                            focusNode: myFocusNode,
                             decoration: InputDecoration(
+                              hintText: 'Enter your password',
                               labelText: 'Password',
+                              labelStyle: TextStyle(color: Colors.orange),
                               border: OutlineInputBorder(),
+                              focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: myFocusNode.hasFocus
+                                          ? Colors.orange
+                                          : Colors.orange)),
                               suffixIcon: GestureDetector(
                                 onTapDown: unvisiblePass,
-                                child: Icon(_passwordVisible
-                                    ? Icons.visibility
-                                    : Icons.visibility_off),
+                                child: Icon(
+                                    _passwordVisible
+                                        ? Icons.visibility
+                                        : Icons.visibility_off,
+                                    color: Colors.orange),
                               ),
                             ),
                             validator: (val) {
@@ -136,11 +175,15 @@ class LoginScreenState extends State<LoginScreen> {
                               "Forgot Password?",
                               textDirection: TextDirection.ltr,
                               style:
-                                  TextStyle(color: Colors.blue, fontSize: 15),
+                                  TextStyle(color: Colors.orange, fontSize: 15),
                             )),
                         Padding(padding: EdgeInsets.all(10)),
                         RaisedButton(
-                          child: Text('Submit'),
+                          child: Text(
+                            'Submit',
+                            style:
+                                TextStyle(fontSize: 15, color: Colors.black87),
+                          ),
                           color: Colors.orange[400],
                           padding: EdgeInsets.symmetric(
                               horizontal: 140, vertical: 20),
@@ -148,13 +191,13 @@ class LoginScreenState extends State<LoginScreen> {
                             validate();
                             String userEmail = _emailidController.text;
                             String userPassword = _passwordController.text;
-
                             FirebaseFirestore.instance
                                 .collection('users')
                                 .get()
                                 .then((QuerySnapshot querySnapshot) {
                               querySnapshot.docs.forEach((docs) {
                                 print(docs["emailId"]);
+                                print(docs.id);
                                 print(docs["password"]);
                                 if ((docs["emailId"] ==
                                         '${_emailidController.text}') &&
@@ -162,7 +205,7 @@ class LoginScreenState extends State<LoginScreen> {
                                         '${_passwordController.text}')) {
                                   print("Login is Successfully");
                                   var snackBar = SnackBar(
-                                    content: Text("login Successful"),
+                                    content: Text(docs.reference.id),
                                     duration:
                                         Duration(seconds: 1, milliseconds: 250),
                                   );
@@ -170,6 +213,7 @@ class LoginScreenState extends State<LoginScreen> {
                                       .showSnackBar(snackBar);
                                   if (userEmail != '' && userPassword != '') {
                                     print('Successfull');
+                                    //print(userEmail);
                                     //making use of object create one instance
                                     loginData.setBool('login', false);
 
@@ -179,17 +223,27 @@ class LoginScreenState extends State<LoginScreen> {
                                         MaterialPageRoute(
                                             builder: (context) =>
                                                 DisplayNotePage()));
+                                    FirebaseFirestore.instance
+                                        .collection('notes')
+                                        .get()
+                                        .then((QuerySnapshot querySnapshot) {
+                                      querySnapshot.docs.forEach((docs) {
+                                        if (docs['emailId'] == userEmail) {
+                                          print('object');
+                                        }
+                                      });
+                                    });
+                                  } else {
+                                    print("First you need to Register");
+                                    var snackBar = SnackBar(
+                                      content: Text(
+                                          "your emailId and password is not matching"),
+                                      duration: Duration(
+                                          seconds: 1, milliseconds: 250),
+                                    );
+                                    ScaffoldMessenger.of(context)
+                                        .showSnackBar(snackBar);
                                   }
-                                } else {
-                                  print("First you need to Register");
-                                  var snackBar = SnackBar(
-                                    content: Text(
-                                        "your emailId and password is not matching"),
-                                    duration:
-                                        Duration(seconds: 1, milliseconds: 250),
-                                  );
-                                  ScaffoldMessenger.of(context)
-                                      .showSnackBar(snackBar);
                                 }
                               });
                             });
@@ -205,7 +259,7 @@ class LoginScreenState extends State<LoginScreen> {
                                 TextSpan(
                                   text: 'Sign up',
                                   style: TextStyle(
-                                      color: Colors.blue, fontSize: 15),
+                                      color: Colors.orange, fontSize: 15),
                                   //  recognizer: TapGestureRecognizer().onTap = (){
                                   //    Navigator.push(context, MaterialPageRoute(builder: (context) => SignUp()));
                                   // }

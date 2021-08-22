@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_application_1/screens/archive_notes.dart';
 import 'package:flutter_application_1/screens/display_notes.dart';
+import 'package:flutter_application_1/screens/user_login.dart';
 import 'package:flutter_application_1/utils/firebase.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -32,6 +33,7 @@ class AddNotePageState extends State<AddNotePage> {
   late DateTime pickedDate = DateTime.now();
   late TimeOfDay pickedTime = TimeOfDay.now();
   late bool _pin = false;
+  bool _isDeleting = false;
 
   void initState() {
     super.initState();
@@ -55,7 +57,7 @@ class AddNotePageState extends State<AddNotePage> {
     return Scaffold(
         backgroundColor: _color,
         appBar: AppBar(
-            backwardsCompatibility: true,
+            backwardsCompatibility: false,
             systemOverlayStyle: SystemUiOverlayStyle(statusBarColor: _color),
             backgroundColor: _color,
             elevation: 0.0,
@@ -77,16 +79,21 @@ class AddNotePageState extends State<AddNotePage> {
                                       ),
                                       color: Colors.black.withOpacity(0.7),
                                       onPressed: () async{
+                                        if(_titlecontroller.text.isEmpty && _contentcontroller.text.isEmpty){
+                                          Navigator.pop(context);
+                                        }else{
                                          await Database.addItem(
                                            title: _titlecontroller.text, 
                                            content: _contentcontroller.text,
                                            color: '$_color',
                                            archive: false,
-                                           pin: true,
-                                           userEmail: '$userEmail', 
+                                           deletenote: _isDeleting,
+                                           pin: _pin,
+                                           userEmail: '$userEmail',
+                                          // label: 
                                            );
                                            Navigator.pop(context); 
-                                      }),
+                                      }}),
                                   SizedBox(width: 190.0),
                                   IconButton(
                                       icon: Icon(_pin ? Icons.push_pin : Icons.push_pin_outlined,
@@ -160,6 +167,17 @@ class AddNotePageState extends State<AddNotePage> {
                                              Navigator.push(context, MaterialPageRoute(builder: 
                                              (context) => DisplayNotePage()));
                                       }else{
+                                         Database.addItem(
+                                           title: _titlecontroller.text, 
+                                           content: _contentcontroller.text,
+                                           color: '$_color',
+                                           archive: true,
+                                           deletenote: false,
+                                           pin: _pin,
+                                           userEmail: '$userEmail', 
+                                           );
+                                         Navigator.push(context, MaterialPageRoute(builder: 
+                                        (context) => ArchivePage()));
                                         var snackBar = SnackBar(
                                           backgroundColor: Colors.black,
                                     content: Row(
@@ -177,34 +195,12 @@ class AddNotePageState extends State<AddNotePage> {
                                       color: Colors.orange
                                     ),
                                     ),
-                                    onTap: () async {
-                                       await Database.addItem(
-                                           title: _titlecontroller.text, 
-                                           content: _contentcontroller.text,
-                                           color: '$_color',
-                                           archive: true,
-                                           pin: false,
-                                           userEmail: '$userEmail', 
-                                           );
-                                         Navigator.push(context, MaterialPageRoute(builder: 
-                                        (context) => DisplayNotePage()));
-                                    },                                
                                     )]),
                                     duration:
                                         Duration(seconds: 2, milliseconds: 250),
                                   );
                                   ScaffoldMessenger.of(context)
                                       .showSnackBar(snackBar);
-                                        Database.addItem(
-                                           title: _titlecontroller.text, 
-                                           content: _contentcontroller.text,
-                                           color: '$_color',
-                                           archive: true,
-                                           pin: false,
-                                           userEmail: '$userEmail', 
-                                           );
-                                        () => Navigator.push(context, MaterialPageRoute(builder: 
-                                        (context) => ArchivePage()));
                                       }
                                             }
                             ),
@@ -382,7 +378,9 @@ class AddNotePageState extends State<AddNotePage> {
                                       leading: new Icon(Icons.delete_sharp),
                                       title: new Text('Delete'),
                                       onTap: () {
-                                        Navigator.pop(context);
+                                        setState(() {
+                                          isDeleting: false;
+                                        });
                                       },
                                     ),
                                     ListTile(
@@ -412,7 +410,6 @@ class AddNotePageState extends State<AddNotePage> {
                                       ),
                                       title: new Text('Labels'),
                                       onTap: () {
-                                        Navigator.pop(context);
                                       },
                                     ),
                                   ],

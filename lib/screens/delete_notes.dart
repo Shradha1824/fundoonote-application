@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'add_notes.dart';
+import 'deleted_note_edit_page.dart';
 import 'display_notes.dart';
 import 'edit_notes.dart';
 
@@ -153,7 +154,8 @@ class DeleteNotesPage extends StatelessWidget {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => EditNotePage(
+                                        builder: (context) =>
+                                            EditDeleteNotesPage(
                                               editDocument: document,
                                             )));
                               },

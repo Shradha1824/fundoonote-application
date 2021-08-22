@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_application_1/screens/archive_notes.dart';
 import 'package:flutter_application_1/screens/display_notes.dart';
+import 'package:flutter_application_1/screens/user_login.dart';
 import 'package:flutter_application_1/utils/firebase.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -71,7 +72,6 @@ class EditNotePageState extends State<EditNotePage> {
     });
   }
 
-  TextEditingController _colorController = TextEditingController();
   TextEditingController _titlecontroller = TextEditingController();
   TextEditingController _contentcontroller = TextEditingController();
 
@@ -80,7 +80,7 @@ class EditNotePageState extends State<EditNotePage> {
     return Scaffold(
         backgroundColor: _color,
         appBar: AppBar(
-            backwardsCompatibility: true,
+            backwardsCompatibility: false,
             systemOverlayStyle: SystemUiOverlayStyle(statusBarColor: _color),
             backgroundColor: _color,
             elevation: 0.0,
@@ -214,6 +214,30 @@ class EditNotePageState extends State<EditNotePage> {
                                               MaterialPageRoute(
                                                   builder: (context) =>
                                                       DisplayNotePage()));
+                                          var snackBar = SnackBar(
+                                            backgroundColor: Colors.black,
+                                            content: Row(children: [
+                                              Text(
+                                                "Note Archive",
+                                                style: TextStyle(
+                                                    color: Colors.white),
+                                              ),
+                                              SizedBox(
+                                                width: 180,
+                                              ),
+                                              InkWell(
+                                                child: Text(
+                                                  "Undo",
+                                                  style: TextStyle(
+                                                      color: Colors.orange),
+                                                ),
+                                              )
+                                            ]),
+                                            duration: Duration(
+                                                seconds: 2, milliseconds: 250),
+                                          );
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(snackBar);
                                         }
                                       }),
                                 ])))))),
@@ -265,9 +289,9 @@ class EditNotePageState extends State<EditNotePage> {
                 ]),
                 padding: EdgeInsets.all(20))),
         bottomNavigationBar: BottomAppBar(
-            color: _color,
+            color: otherColor,
             child: Container(
-                color: Colors.white,
+                color: otherColor,
                 child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
@@ -397,7 +421,6 @@ class EditNotePageState extends State<EditNotePage> {
                                           {
                                             await widget.editDocument.reference
                                                 .update({
-                                              //'docId': widget.documentId,
                                               'title': _titlecontroller.text,
                                               'content':
                                                   _contentcontroller.text,
@@ -413,24 +436,29 @@ class EditNotePageState extends State<EditNotePage> {
                                                     builder: (context) =>
                                                         DeleteNotesPage()));
                                             var snackBar = SnackBar(
-                                                backgroundColor: Colors.black,
-                                                content: Row(children: [
-                                                  Text(
-                                                    "Note moved to Bin",
-                                                    style: TextStyle(
-                                                        color: Colors.white),
-                                                  ),
-                                                  SizedBox(
-                                                    width: 180,
-                                                  ),
-                                                  InkWell(
-                                                    child: Text(
-                                                      "Undo",
+                                              backgroundColor: Colors.black,
+                                              content: Row(children: [
+                                                Text(
+                                                  "Note moved to Bin ",
+                                                  style: TextStyle(
+                                                      color: Colors.white),
+                                                ),
+                                                SizedBox(
+                                                  width: 180,
+                                                ),
+                                                InkWell(
+                                                  child: Text("Undo",
                                                       style: TextStyle(
-                                                          color: Colors.orange),
-                                                    ),
-                                                  )
-                                                ]));
+                                                          color:
+                                                              Colors.orange)),
+                                                ),
+                                              ]),
+                                              duration: Duration(
+                                                  seconds: 2,
+                                                  milliseconds: 250),
+                                            );
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(snackBar);
                                           }
                                         }),
                                     ListTile(

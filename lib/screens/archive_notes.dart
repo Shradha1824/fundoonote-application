@@ -1,27 +1,31 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'add_notes.dart';
 import 'display_notes.dart';
+import 'edit_notes.dart';
 
 class ArchivePage extends StatelessWidget {
-  static const String routeName = '/reminders';
-
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
         appBar: AppBar(
             elevation: 0.0,
+            backwardsCompatibility: false,
+            systemOverlayStyle:
+                SystemUiOverlayStyle(statusBarColor: Colors.white),
             backgroundColor: Colors.white10,
             bottom: PreferredSize(
                 preferredSize: Size.fromHeight(20),
                 child: Container(
-                    // margin: EdgeInsets.only(left: 15, right: 15, bottom: 30),
+                    margin: EdgeInsets.only(left: 5, right: 5, bottom: 10),
                     child: Padding(
-                        padding: const EdgeInsets.only(top: 5, bottom: 10),
+                        padding: EdgeInsets.fromLTRB(2, 5, 2, 10),
                         child: Material(
                             color: Colors.white10,
                             child: Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment: MainAxisAlignment.center,
+                                // mainAxisSize: MainAxisSize.max,
+                                //mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   IconButton(
                                       icon: Icon(
@@ -32,6 +36,9 @@ class ArchivePage extends StatelessWidget {
                                       onPressed: () {
                                         NavigationDrawer();
                                       }),
+                                  SizedBox(
+                                    width: 10,
+                                  ),
                                   Text(
                                     "Archive",
                                     style: TextStyle(
@@ -69,7 +76,6 @@ class ArchivePage extends StatelessWidget {
             stream: FirebaseFirestore.instance
                 .collection("notes")
                 .where("archive", isEqualTo: true)
-                .where("pin", isEqualTo: false)
                 .snapshots(),
             builder:
                 (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -100,8 +106,10 @@ class ArchivePage extends StatelessWidget {
                           ),
                           Text("Notes you add appear here"),
                         ]));
-                  return Center(
-                      child: SingleChildScrollView(
+                  SizedBox(
+                    height: 10,
+                  );
+                  return SingleChildScrollView(
                     child: Wrap(
                         textDirection: TextDirection.ltr,
                         direction: Axis.horizontal,
@@ -116,41 +124,59 @@ class ArchivePage extends StatelessWidget {
                           Color otherColor = new Color(value);
                           print(otherColor);
                           return Stack(children: [
-                            Container(
-                                width: 360,
-                                padding: EdgeInsets.fromLTRB(5, 10, 0, 15),
-                                margin: EdgeInsets.fromLTRB(10, 15, 10, 15),
-                                decoration: BoxDecoration(
-                                  color: otherColor,
-                                  border: Border.all(color: Colors.black38),
-                                  borderRadius: BorderRadius.circular(8.0),
-                                ),
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      document['title'],
-                                      textAlign: TextAlign.start,
-                                      style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold),
-                                      maxLines: 5,
-                                    ),
-                                    SizedBox(
-                                      height: 10,
-                                    ),
-                                    Text(
-                                      document['content'],
-                                      textAlign: TextAlign.start,
-                                      style: TextStyle(
-                                        fontSize: 15,
+                            InkWell(
+                              child: Container(
+                                  width: 360,
+                                  padding: EdgeInsets.all(15),
+                                  margin: EdgeInsets.fromLTRB(15, 10, 10, 15),
+                                  decoration: BoxDecoration(
+                                      color: otherColor,
+                                      border: Border.all(color: Colors.black38),
+                                      borderRadius: BorderRadius.circular(8.0),
+                                      boxShadow: [
+                                        BoxShadow(
+                                            color: Colors.grey,
+                                            blurRadius: 1,
+                                            spreadRadius: 0.0,
+                                            offset: Offset(2.0, 2.0))
+                                      ]),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        document['title'],
+                                        textAlign: TextAlign.start,
+                                        style: TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold),
+                                        maxLines: 5,
                                       ),
-                                      maxLines: 10,
-                                    ),
-                                  ],
-                                ))
+                                      SizedBox(
+                                        height: 10,
+                                      ),
+                                      Text(
+                                        document['content'],
+                                        textAlign: TextAlign.start,
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                        ),
+                                        maxLines: 10,
+                                      ),
+                                    ],
+                                  )),
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => EditNotePage(
+                                              editDocument: document,
+                                            )));
+                              },
+                            ),
                           ]);
                         }).toList()),
-                  ));
+                  );
               }
             }));
   }

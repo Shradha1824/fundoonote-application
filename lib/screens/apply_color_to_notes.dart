@@ -39,6 +39,7 @@ class DisplayColorState extends State<DisplayColor> {
                     widget.onSelectedColor(itemColor);
                     setState(() {
                       _choosedColor = itemColor;
+                      print('SelectedColor:$_choosedColor');
                     });
                   },
                   child: Container(

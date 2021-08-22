@@ -1,9 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_application_1/screens/edit_notes.dart';
-import 'package:flutter_application_1/screens/search_notes.dart';
+import 'package:flutter_application_1/utils/upload_image.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'add_notes.dart';
@@ -23,12 +28,14 @@ class DisplayNotePageState extends State<DisplayNotePage> {
 
   CollectionReference _collectionRef =
       FirebaseFirestore.instance.collection('notes');
-
-  late Color _color = Colors.white;
-  late bool archive = false;
+  final databaseReference = FirebaseStorage.instance;
+  Color _color = Colors.white;
+  bool archive = false;
   late bool _pin;
+  bool _gridView = false;
 
-  var title;
+  var searchString;
+  TextEditingController searchTextEdittingController = TextEditingController();
 
   @override
   void initState() {
@@ -45,9 +52,6 @@ class DisplayNotePageState extends State<DisplayNotePage> {
       print('_color: $_color');
     });
   }
-
-  TextEditingController _titlecontroller = TextEditingController();
-  TextEditingController _contentcontroller = TextEditingController();
 
   Future<void> getNotes() async {
     // Get docs from collection reference
@@ -66,6 +70,7 @@ class DisplayNotePageState extends State<DisplayNotePage> {
             backwardsCompatibility: false,
             systemOverlayStyle:
                 SystemUiOverlayStyle(statusBarColor: Colors.white10),
+            automaticallyImplyLeading: true,
             backgroundColor: Colors.white10,
             bottom: PreferredSize(
                 preferredSize: Size.fromHeight(20),
@@ -103,158 +108,51 @@ class DisplayNotePageState extends State<DisplayNotePage> {
                                   SizedBox(
                                     width: 0,
                                   ),
-                                  GestureDetector(
-                                      onTap: () {
-                                        // Navigator.push(
-                                        //   context,
-                                        //  MaterialPageRoute(
-                                        //    builder: (context) =>
-                                        //       CreateNewLabel()));
+                                  Expanded(
+                                    child: TextField(
+                                      decoration: InputDecoration.collapsed(
+                                        hintText: "Search your notes",
+                                      ),
+                                      onChanged: (value) {
+                                        setState(() {
+                                          searchString = value.toLowerCase();
+                                        });
                                       },
-                                      child: Text(
-                                        "Search your notes",
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                        ),
-                                      )),
+                                      controller: searchTextEdittingController,
+                                    ),
+                                  ),
                                   SizedBox(
                                     width: 55,
                                   ),
                                   IconButton(
                                     icon: Icon(
-                                      Icons.grid_view_outlined,
+                                      _gridView
+                                          ? Icons.grid_view_outlined
+                                          : Icons.view_agenda_outlined,
                                       color: Colors.black.withOpacity(0.7),
                                       size: 25,
                                     ),
-                                    onPressed: () {},
-                                  ),
-                                  IconButton(
-                                    icon: CircleAvatar(
-                                      backgroundColor: Colors.grey[400],
-                                      radius: 15,
-                                    ),
                                     onPressed: () {
-                                      loginData.setBool('login', true);
-                                      Navigator.pushReplacement(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  LoginScreen()));
+                                      setState(() {
+                                        _gridView = !_gridView;
+                                      });
                                     },
                                   ),
+                                  IconButton(
+                                      icon: CircleAvatar(
+                                        backgroundColor: Colors.grey[400],
+                                        radius: 15,
+                                      ),
+                                      onPressed: () {
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    UploadedPickPage()));
+                                      }),
                                 ])))))),
         drawer: NavigationDrawer(),
-        body: StreamBuilder<QuerySnapshot>(
-            //pass 'Stream<QuerySnapshot>' to stream
-            stream: FirebaseFirestore.instance
-                .collection("notes")
-                .where("archive", isEqualTo: false)
-                .where("delete", isEqualTo: false)
-                .snapshots(),
-            builder:
-                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (snapshot.hasError) return Text('${snapshot.error}');
-              switch (snapshot.connectionState) {
-                case ConnectionState.none:
-                case ConnectionState.waiting:
-                  return Center(
-                    child: CircularProgressIndicator(),
-                  );
-                case ConnectionState.active:
-                case ConnectionState.done:
-                  if (snapshot.hasError)
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  if (!snapshot.hasData)
-                    return Center(
-                        child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                          Image.asset(
-                            "assets/images/bulb[1].png",
-                            width: 200,
-                            height: 100,
-                          ),
-                          SizedBox(
-                            height: 15,
-                          ),
-                          Text("Notes you add appear here"),
-                        ]));
-                  return SingleChildScrollView(
-                    child: Wrap(
-                        textDirection: TextDirection.ltr,
-                        direction: Axis.horizontal,
-                        //retrieve List<DocumentSnapshot> from snanpshot
-                        children: snapshot.data!.docs
-                            .map((DocumentSnapshot document) {
-                          String testingColor = document['color'].toString();
-                          print(testingColor);
-                          String valueString =
-                              testingColor.split('(0x')[1].split(')')[0];
-                          int value = int.parse(valueString, radix: 16);
-                          Color otherColor = new Color(value);
-                          print(otherColor);
-                          return InkWell(
-                              child: Column(children: [
-                                // Container(
-                                //   margin: EdgeInsets.only(top: 5, left: 25),
-                                //  alignment: Alignment.centerLeft,
-                                // child: Text("OTHERS")),
-                                Container(
-                                    width: 360,
-                                    padding: EdgeInsets.all(15),
-                                    margin: EdgeInsets.fromLTRB(15, 20, 10, 15),
-                                    decoration: BoxDecoration(
-                                        color: otherColor,
-                                        border:
-                                            Border.all(color: Colors.black38),
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                        boxShadow: [
-                                          BoxShadow(
-                                              color: Colors.grey,
-                                              blurRadius: 1,
-                                              spreadRadius: 0.0,
-                                              offset: Offset(2.0, 2.0))
-                                        ]),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          document['title'],
-                                          textAlign: TextAlign.start,
-                                          style: TextStyle(
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.bold),
-                                          maxLines: 5,
-                                        ),
-                                        SizedBox(
-                                          height: 10,
-                                        ),
-                                        Text(
-                                          document['content'],
-                                          textAlign: TextAlign.start,
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                          ),
-                                          maxLines: 10,
-                                        ),
-                                      ],
-                                    ))
-                              ]),
-                              onTap: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => EditNotePage(
-                                              editDocument: document,
-                                            )));
-                              });
-                        }).toList()),
-                  );
-              }
-            }),
+        body: changeView(),
         floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
         floatingActionButton: FloatingActionButton(
           onPressed: () {},
@@ -311,6 +209,183 @@ class DisplayNotePageState extends State<DisplayNotePage> {
                 ],
               ),
             )));
+  }
+
+  Widget gridView() {
+    return Scaffold(
+      body: StreamBuilder<QuerySnapshot>(
+        //pass 'Stream<QuerySnapshot>' to stream
+        stream: (searchString == null || searchString.trim() == '')
+            ? FirebaseFirestore.instance
+                .collection("notes")
+                .where("archive", isEqualTo: false)
+                .where("delete", isEqualTo: false)
+                .snapshots()
+            : FirebaseFirestore.instance
+                .collection("notes")
+                .where("title", isGreaterThanOrEqualTo: searchString)
+                .snapshots(),
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (!snapshot.hasData) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+          return GridView(
+            gridDelegate:
+                SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+            children: snapshot.data!.docs.map((doc) {
+              String testingColor = doc['color'].toString();
+              print(testingColor);
+              String valueString = testingColor.split('(0x')[1].split(')')[0];
+              int value = int.parse(valueString, radix: 16);
+              Color otherColor = new Color(value);
+              print(otherColor);
+              return Padding(
+                  padding: EdgeInsets.all(0),
+                  child: InkWell(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    EditNotePage(editDocument: doc)));
+                      },
+                      child: Container(
+                        padding: EdgeInsets.all(15),
+                        margin: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                            color: otherColor,
+                            border: Border.all(
+                                color: Colors.black54.withOpacity(0.2)),
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                  color: Colors.grey,
+                                  blurRadius: 1,
+                                  spreadRadius: 0.0,
+                                  offset: Offset(2.0, 2.0))
+                            ]),
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                doc['title'],
+                                textAlign: TextAlign.start,
+                                style: TextStyle(
+                                    fontSize: 20, fontWeight: FontWeight.bold),
+                                maxLines: 5,
+                              ),
+                              SizedBox(
+                                height: 6,
+                              ),
+                              Text(
+                                doc['content'],
+                                textAlign: TextAlign.start,
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.normal),
+                                maxLines: 10,
+                              ),
+                            ]),
+                      )));
+            }).toList(),
+          );
+        },
+      ),
+    );
+  }
+
+  changeView() {
+    if (_gridView == false) {
+      return gridView();
+    } else {
+      return listViewhNotes();
+    }
+  }
+
+  Widget listViewhNotes() {
+    return Scaffold(
+      body: StreamBuilder<QuerySnapshot>(
+        //pass 'Stream<QuerySnapshot>' to stream
+        stream: (searchString == null || searchString.trim() == '')
+            ? FirebaseFirestore.instance
+                .collection("notes")
+                .where("archive", isEqualTo: false)
+                .where("delete", isEqualTo: false)
+                .snapshots()
+            : FirebaseFirestore.instance
+                .collection('notes')
+                .where("title", isGreaterThanOrEqualTo: searchString)
+                .snapshots(),
+
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (!snapshot.hasData) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+          return ListView(
+            children: snapshot.data!.docs.map((doc) {
+              String testingColor = doc['color'].toString();
+              print(testingColor);
+              String valueString = testingColor.split('(0x')[1].split(')')[0];
+              int value = int.parse(valueString, radix: 16);
+              Color otherColor = new Color(value);
+              print(otherColor);
+              return Padding(
+                  padding: EdgeInsets.all(0),
+                  child: InkWell(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    EditNotePage(editDocument: doc)));
+                      },
+                      child: Container(
+                        padding: EdgeInsets.all(15),
+                        margin: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                            color: otherColor,
+                            border: Border.all(
+                                color: Colors.black54.withOpacity(0.2)),
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                  color: Colors.grey,
+                                  blurRadius: 1,
+                                  spreadRadius: 0.0,
+                                  offset: Offset(2.0, 2.0))
+                            ]),
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                doc['title'],
+                                textAlign: TextAlign.start,
+                                style: TextStyle(
+                                    fontSize: 20, fontWeight: FontWeight.bold),
+                                maxLines: 5,
+                              ),
+                              SizedBox(
+                                height: 6,
+                              ),
+                              Text(
+                                doc['content'],
+                                textAlign: TextAlign.start,
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.normal),
+                                maxLines: 10,
+                              ),
+                            ]),
+                      )));
+            }).toList(),
+          );
+        },
+      ),
+    );
   }
 }
 
@@ -379,8 +454,6 @@ class NavigationDrawer extends StatelessWidget {
                 color: Colors.black,
                 fontSize: 20.0,
                 fontWeight: FontWeight.w500,
-                //foreground: Paint()
-                // shadows:
               ))),
     );
   }
