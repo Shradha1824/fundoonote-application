@@ -26,23 +26,82 @@ class DisplayNotePageState extends State<DisplayNotePage> {
   late SharedPreferences loginData; // create object for sharedPreference
   late String userEmail;
 
-  CollectionReference _collectionRef =
-      FirebaseFirestore.instance.collection('notes');
+  // CollectionReference _collectionRef =
+  //     FirebaseFirestore.instance.collection('notes');
   final databaseReference = FirebaseStorage.instance;
   Color _color = Colors.white;
   bool archive = false;
-  late bool _pin;
   bool _gridView = false;
-
   var searchString;
-  TextEditingController searchTextEdittingController = TextEditingController();
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
+  List<DocumentSnapshot> _notes = [];
+  bool _loadingNotes = false;
+  int _perPage = 10;
+  DocumentSnapshot? _lastDocument;
+  ScrollController scrollController = ScrollController();
+  bool _gettingMoreNotes = false;
+  bool _moreNotesAvailabel = true;
+
+  _getNotes() async {
+    Query q = firestore.collection("notes").orderBy("title").limit(_perPage);
+    setState(() {
+      _loadingNotes = true;
+    });
+
+    QuerySnapshot querySnapshot = await q.get();
+
+    _notes = querySnapshot.docs;
+    _lastDocument = querySnapshot.docs[querySnapshot.docs.length - 1];
+    setState(() {
+      _loadingNotes = false;
+    });
+  }
+
+  _getMoreNotes() async {
+    print("_gettingMoreProducts called");
+    if (_moreNotesAvailabel = false) {
+      print("No more Products");
+      return;
+    }
+
+    if (_gettingMoreNotes = true) {
+      return;
+    }
+    _gettingMoreNotes = true;
+    Query q = firestore
+        .collection("notes")
+        .orderBy("title")
+        .startAfter([_lastDocument!.data()]).limit(_perPage);
+
+    QuerySnapshot querySnapshot = await q.get();
+
+    if (querySnapshot.docs.length > _perPage) {
+      _moreNotesAvailabel = false;
+    }
+    _lastDocument = querySnapshot.docs[querySnapshot.docs.length - 1];
+
+    _notes.addAll(querySnapshot.docs);
+    setState(() {
+      _gettingMoreNotes = false;
+    });
+  }
 
   @override
   void initState() {
     super.initState();
-    getNotes();
     getLoginData();
+    _getNotes();
+    scrollController.addListener(() {
+      double maxScroll = scrollController.position.maxScrollExtent;
+      double currentScroll = scrollController.position.pixels;
+      double delta = MediaQuery.of(context).size.height * 0.25;
+      if (maxScroll - currentScroll <= delta) {
+        _getMoreNotes();
+      }
+    });
   }
+
+  TextEditingController searchTextEdittingController = TextEditingController();
 
   void getLoginData() async {
     loginData = await SharedPreferences.getInstance();
@@ -51,15 +110,6 @@ class DisplayNotePageState extends State<DisplayNotePage> {
       print('userEmail: $userEmail');
       print('_color: $_color');
     });
-  }
-
-  Future<void> getNotes() async {
-    // Get docs from collection reference
-    QuerySnapshot querySnapshot = await _collectionRef.get();
-
-    // Get data from docs and convert map to List
-    final allData = querySnapshot.docs.map((doc) => doc.data()).toList();
-    print(allData);
   }
 
   @override
@@ -306,86 +356,106 @@ class DisplayNotePageState extends State<DisplayNotePage> {
 
   Widget listViewhNotes() {
     return Scaffold(
-      body: StreamBuilder<QuerySnapshot>(
-        //pass 'Stream<QuerySnapshot>' to stream
-        stream: (searchString == null || searchString.trim() == '')
-            ? FirebaseFirestore.instance
-                .collection("notes")
-                .where("archive", isEqualTo: false)
-                .where("delete", isEqualTo: false)
-                .snapshots()
-            : FirebaseFirestore.instance
-                .collection('notes')
-                .where("title", isGreaterThanOrEqualTo: searchString)
-                .snapshots(),
+        body: StreamBuilder<QuerySnapshot>(
+      //pass 'Stream<QuerySnapshot>' to stream
+      stream: (searchString == null || searchString.trim() == '')
+          ? FirebaseFirestore.instance
+              .collection("notes")
+              .where("archive", isEqualTo: false)
+              .where("delete", isEqualTo: false)
+              .snapshots()
+          : FirebaseFirestore.instance
+              .collection('notes')
+              .where("title", isGreaterThanOrEqualTo: searchString)
+              .snapshots(),
 
-        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (!snapshot.hasData) {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-          return ListView(
-            children: snapshot.data!.docs.map((doc) {
-              String testingColor = doc['color'].toString();
-              print(testingColor);
-              String valueString = testingColor.split('(0x')[1].split(')')[0];
-              int value = int.parse(valueString, radix: 16);
-              Color otherColor = new Color(value);
-              print(otherColor);
-              return Padding(
-                  padding: EdgeInsets.all(0),
-                  child: InkWell(
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    EditNotePage(editDocument: doc)));
-                      },
-                      child: Container(
-                        padding: EdgeInsets.all(15),
-                        margin: EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                            color: otherColor,
-                            border: Border.all(
-                                color: Colors.black54.withOpacity(0.2)),
-                            borderRadius: BorderRadius.circular(10),
-                            boxShadow: [
-                              BoxShadow(
-                                  color: Colors.grey,
-                                  blurRadius: 1,
-                                  spreadRadius: 0.0,
-                                  offset: Offset(2.0, 2.0))
-                            ]),
-                        child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                doc['title'],
-                                textAlign: TextAlign.start,
-                                style: TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.bold),
-                                maxLines: 5,
-                              ),
-                              SizedBox(
-                                height: 6,
-                              ),
-                              Text(
-                                doc['content'],
-                                textAlign: TextAlign.start,
-                                style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.normal),
-                                maxLines: 10,
-                              ),
-                            ]),
-                      )));
-            }).toList(),
+      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+        if (!snapshot.hasData) {
+          return Center(
+            child: CircularProgressIndicator(),
           );
-        },
-      ),
-    );
+        }
+        return Column(children: [
+          _loadingNotes == true
+              ? Container(
+                  child: Center(
+                    child: Text("Loading........."),
+                  ),
+                )
+              : Expanded(
+                  child: _notes.length == 0
+                      ? Center(
+                          child: Text("No Data............"),
+                        )
+                      : ListView(
+                          controller: scrollController,
+                          children: snapshot.data!.docs.map((doc) {
+                            String testingColor = doc['color'].toString();
+                            print(testingColor);
+                            String valueString =
+                                testingColor.split('(0x')[1].split(')')[0];
+                            int value = int.parse(valueString, radix: 16);
+                            Color otherColor = new Color(value);
+                            print(otherColor);
+                            return Padding(
+                                padding: EdgeInsets.all(0),
+                                child: InkWell(
+                                    onTap: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  EditNotePage(
+                                                      editDocument: doc)));
+                                    },
+                                    child: Container(
+                                      padding: EdgeInsets.all(15),
+                                      margin: EdgeInsets.all(10),
+                                      decoration: BoxDecoration(
+                                          color: otherColor,
+                                          border: Border.all(
+                                              color: Colors.black54
+                                                  .withOpacity(0.2)),
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                          boxShadow: [
+                                            BoxShadow(
+                                                color: Colors.grey,
+                                                blurRadius: 1,
+                                                spreadRadius: 0.0,
+                                                offset: Offset(2.0, 2.0))
+                                          ]),
+                                      child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              doc['title'],
+                                              textAlign: TextAlign.start,
+                                              style: TextStyle(
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.bold),
+                                              maxLines: 5,
+                                            ),
+                                            SizedBox(
+                                              height: 6,
+                                            ),
+                                            Text(
+                                              doc['content'],
+                                              textAlign: TextAlign.start,
+                                              style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight:
+                                                      FontWeight.normal),
+                                              maxLines: 10,
+                                            ),
+                                          ]),
+                                    )));
+                          }).toList(),
+                        ))
+        ]);
+      },
+    ));
   }
 }
 

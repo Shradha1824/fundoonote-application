@@ -5,7 +5,6 @@ import 'package:flutter_application_1/screens/delete_notes.dart';
 import 'package:flutter_application_1/screens/edit_notes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'display_notes.dart';
 
 class EditDeleteNotesPage extends StatefulWidget {
   DocumentSnapshot editDocument;

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'display_notes.dart';
 
 class DisplayColor extends StatefulWidget {
   final Function onSelectedColor;

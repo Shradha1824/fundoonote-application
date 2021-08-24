@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'add_notes.dart';
 import 'deleted_note_edit_page.dart';
-import 'display_notes.dart';
 import 'edit_notes.dart';
+import 'home.dart';
 
 class DeleteNotesPage extends StatelessWidget {
   @override

@@ -9,8 +9,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/utils/firebase.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:form_field_validator/form_field_validator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import 'display_notes.dart';
+import 'home.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
