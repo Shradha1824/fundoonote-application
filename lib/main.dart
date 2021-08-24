@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_application_1/screens/add_notes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_application_1/screens/display_notes.dart';
 import 'screens/add_notes.dart';
+import 'screens/home.dart';
 import 'screens/login.dart';
 import 'screens/signup.dart';
 

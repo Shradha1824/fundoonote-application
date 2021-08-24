@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'display_notes.dart';
+
+import 'home.dart';
 
 class ArchivePage extends StatelessWidget {
   static const String routeName = '/reminders';
